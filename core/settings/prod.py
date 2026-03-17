@@ -24,3 +24,11 @@ ALLOWED_HOSTS = ['yourdomain.com', 'api.yourdomain.com']
 # Static files handling in production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# CORS Config for Production
+CORS_ALLOWED_ORIGINS = [
+    "https://mai-english.com",
+    "https://admin.mai-english.com",
+    # Add your Flutter Web / Next.js domains here
+]
+CORS_ALLOW_CREDENTIALS = True
