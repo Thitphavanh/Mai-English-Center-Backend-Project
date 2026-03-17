@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-white overflow-hidden py-16 sm:py-24 lg:py-32">
+    <!-- Background Decorator -->
+    <div class="absolute inset-0 z-0 pointer-events-none">
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-brand/5 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-brand/5 blur-3xl"></div>
+    </div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
+            
+            <!-- Text Content -->
+            <div class="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
+                <span class="font-semibold uppercase tracking-wider text-brand mb-4 block text-dark">
+                    ເສີມສ້າງທັກສະ ຟັງ ເວົ້າ ອ່ານ ຂຽນ ຮຽນມ່ວນ ໃຊ້ງານໄດ້ຈິງ
+                </span>
+                <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-5xl lg:text-5xl xl:text-6xl">
+                    <span class="block text-brand">EDUCATION AND EXPLORATION </span>
+                    <span class="block text-dark text-3xl mt-2"></span>
+                </h1>
+                <p class="mt-4 text-base text-gray-600 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-md lg:mx-0">
+                    ເປີດຮັບສະໝັກນັກຮຽນຮຽນເພີ່ມພາສາອັງກິດເລີ່ມຕັ້ງແຕ່ມື້ນີ້ ສໍາລັບຜູ້ເລີ່ມຕົ້ນພື້ນຖານ ແລະ ສໍາລັບຜູ້ທີ່ມີພື້ນຖານມາແລ້ວຕ້ອງການຕໍ່ຍອດນໍາໃຊ້ໃນຊີວິດປະຈຳວັນ. ສອນຫລັກໄວຍະກອນພາສາອັງກິດດ້ວຍຄູມືອາຊີບ ຈົບຈາກອົດສະຕຣາລີ ພ້ອມປະສົບການສອນກວ່າ 10 ປີ.
+                </p>
+                <div class="mt-8 flex flex-col sm:flex-row sm:justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-brand hover:bg-brand-dark transition-colors shadow-lg shadow-brand/30">
+                        Get Started
+                    </a>
+                    <a href="#" class="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        View Courses
+                    </a>
+                </div>
+            </div>
+
+            <!-- Image/Illustration -->
+            <div class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center">
+                <div class="relative mx-auto w-full rounded-2xl shadow-xl shadow-brand/10 lg:max-w-md bg-white border border-gray-100 p-8 flex justify-center items-center overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-brand/5 to-transparent"></div>
+                    <img class="relative z-10 w-48 h-48 md:w-64 md:h-64 object-contain" src="{% static 'images/logo.JPG' %}" alt="Mai English Center Logo">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-gray-50 border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-gray-900">ສິ່ງອຳນວຍຄວາມສະດວກຂອງພວກເຮົາ</h2>
+            <p class="mt-4 text-gray-500">ການຮຽນ-ການສອນທີ່ທັນສະໄໝ ພ້ອມຕອບໂຈດທຸກໄວ</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 inline-flex items-center justify-center rounded-xl bg-brand/10 text-brand mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">ຫ້ອງຮຽນໃຫຍ່ ແລະ ສະອາດ</h3>
+                <p class="text-gray-500 text-sm">ສ້າງບັນຍາກາດການຮຽນໃຫ້ສົດໃສ ແລະ ສະອາດສະອ້ານຕະຫຼອດເວລາ.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 inline-flex items-center justify-center rounded-xl bg-brand/10 text-brand mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">ເດີ່ນຫຼິ້ນກາງແຈ້ງກວ້າງຂວາງ</h3>
+                <p class="text-gray-500 text-sm">ພື້ນທີ່ສຳລັບຜ່ອນຄາຍ ແລະ ເຮັດກິດຈະກຳກາງແຈ້ງສຳລັບນ້ອງໆນັກຮຽນ.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 inline-flex items-center justify-center rounded-xl bg-brand/10 text-brand mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">ອຸປະກອນຄົບຄັນ</h3>
+                <p class="text-gray-500 text-sm">ມີສື່ການຮຽນການສອນທີ່ທັນສະໄໝ ແລະ ກິດຈະກຳທີ່ຫຼາກຫຼາຍ.</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 inline-flex items-center justify-center rounded-xl bg-brand/10 text-brand mb-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">ຫ້ອງຮຽນແອເຢັນໆທຸກຫ້ອງ</h3>
+                <p class="text-gray-500 text-sm">ຫ້ອງຮຽນຕິດແອ A&gt;B&gt;C&gt;D ໃຫ້ຜູ້ຮຽນມີຄວາມສະດວກສະບາຍ.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

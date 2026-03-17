@@ -12,3 +12,6 @@ def test_message(request):
         "message": "Hello Mai English Center",
         "image_url": image_url
     })
+
+def index(request):
+    return render(request, 'index.html')
