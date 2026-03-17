@@ -6,4 +6,9 @@ from rest_framework.response import Response
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def test_message(request):
-    return Response({"message": "Hello Mai English Center"})
+    # Using request.build_absolute_uri to generate a full URL that the Flutter app can access
+    image_url = request.build_absolute_uri('/static/images/logo.JPG')
+    return Response({
+        "message": "Hello Mai English Center",
+        "image_url": image_url
+    })
