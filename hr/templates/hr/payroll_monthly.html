@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-md max-w-full overflow-x-hidden">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">ບັນທຶກວັນເຮັດວຽກ ແລະ ຄິດໄລ່ຄ່າແຮງ</h2>
+            <p class="text-gray-600">ປະຈຳເດືອນ: {{ month_year }}</p>
+        </div>
+        <form method="get" class="flex flex-wrap space-x-2 gap-y-2 justify-end items-center">
+            <input type="text" name="search" value="{{ search_query|default:'' }}" class="border p-2 rounded w-48 shadow-sm" placeholder="🔍 ຄົ້ນຫາຊື່ ຫຼື ເບີໂທ...">
+            <input type="number" name="month" value="{{ month }}" min="1" max="12" class="border p-2 rounded w-20 shadow-sm" placeholder="Month">
+            <input type="number" name="year" value="{{ year }}" min="2020" class="border p-2 rounded w-24 shadow-sm" placeholder="Year">
+            
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition font-semibold"><i class="fas fa-search"></i> ຄົ້ນຫາ</button>
+            <span class="text-gray-300 px-1">|</span>
+            <a href="{% url 'hr:add_employee' %}" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition font-semibold flex items-center">
+                <i class="fas fa-user-plus mr-2"></i> ເພີ່ມພະນັກງານ
+            </a>
+        </form>
+    </div>
+
+    <!-- Timesheet Table matching Excel -->
+    <div class="overflow-x-auto w-full">
+        <table class="min-w-full border-collapse border border-gray-300 text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-gray-100 text-center">
+                    <th class="p-2 border sticky left-0 bg-gray-100 z-10 w-10">ລ/ດ</th>
+                    <th class="p-2 border sticky left-10 bg-gray-100 z-10">ລາຍຊື່ພະນັກງານ</th>
+                    <th class="p-2 border sticky left-44 bg-gray-100 z-10">ເບີໂທຕິດຕໍ່</th>
+                    {% for day in days_range %}
+                    <th class="p-2 border w-8">{{ day }}</th>
+                    {% endfor %}
+                    <th class="p-2 border font-bold">ລວມຊົ່ວໂມງ</th>
+                    <th class="p-2 border font-bold text-green-700">ລວມຈຳນວນເງິນ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in payroll_data %}
+                <tr class="border hover:bg-gray-50 text-center">
+                    <td class="p-2 border sticky left-0 bg-white z-10">{{ forloop.counter }}</td>
+                    <td class="p-2 border font-semibold text-left sticky left-10 bg-white z-10"><a href="#" class="text-blue-600 truncate max-w-[200px]">{{ row.employee.user.get_full_name }}</a></td>
+                    <td class="p-2 border sticky left-44 bg-white z-10">{{ row.employee.phone_number|default:"-" }}</td>
+                    
+                    {% for hours in row.daily_hours %}
+                    <td class="p-2 border cursor-pointer hover:bg-gray-200 transition timesheet-cell {% if hours %}bg-blue-50 text-blue-800 font-bold{% else %}text-gray-300{% endif %}"
+                        data-employee-id="{{ row.employee.id }}" 
+                        data-day="{{ forloop.counter }}" 
+                        data-current="{{ hours|default:'' }}">
+                        {{ hours|default:""|floatformat:0 }}
+                    </td>
+                    {% endfor %}
+                    
+                    <td class="p-2 border font-bold">{{ row.total_hours|floatformat:0 }}</td>
+                    <td class="p-2 border font-bold text-green-700 text-right">{{ row.total_amount_formatted }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="36" class="p-6 text-center text-gray-500">
+                        ບໍ່ມີຂໍ້ມູນພະນັກງານໃນລະບົບ
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr class="border-t-2 border-gray-400 bg-gray-100 font-bold text-lg text-right">
+                    <td colspan="{{ days_range|length|add:4 }}" class="p-4 border pr-6 flex-grow-0">ຍອດລວມ:</td>
+                    <td class="p-4 border text-green-800 text-right">{{ grand_total_amount_formatted }} LAK</td>
+                </tr>
+            </tbody>
+        </table>
+</div>
+
+<!-- Enhanced Tailwind Modal -->
+<div id="timesheetModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity z-50 flex justify-center items-center backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4 transform transition-all scale-100">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-clock text-blue-600"></i> ແກ້ໄຂຊົ່ວໂມງສອນ
+            </h3>
+            <button id="closeModalIcon" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <p class="text-md font-medium text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-5 text-center" id="modalDesc"></p>
+        
+        <input type="hidden" id="modalEmployeeId">
+        <input type="hidden" id="modalYear">
+        <input type="hidden" id="modalMonth">
+        <input type="hidden" id="modalDay">
+
+        <div class="mb-6">
+            <label for="modalHours" class="block text-sm font-semibold text-gray-700 mb-2">ຈຳນວນຊົ່ວໂມງ (Hours)</label>
+            <input type="number" step="0.5" id="modalHours" class="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-lg font-bold text-center text-blue-700 focus:outline-none focus:ring-0 focus:border-blue-500 transition-colors" placeholder="ຕົວຢ່າງ: 2" />
+            <p class="text-xs text-gray-500 mt-2 text-center"><i class="fas fa-info-circle"></i> ຖ້າຕ້ອງການລຶບ ໃຫ້ລຶບຕົວເລກອອກ (ປະຫວ່າງ) ແລ້ວກົດບັນທຶກ.</p>
+        </div>
+        
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+            <button id="closeModalBtn" class="w-full sm:w-auto px-5 py-2.5 bg-white border-2 border-gray-200 font-semibold rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-300 focus:outline-none transition-all">ຍົກເລີກ</button>
+            <button id="saveTimesheetBtn" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 font-semibold text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 focus:outline-none transition-all flex justify-center items-center gap-2"><i class="fas fa-save"></i> ບັນທຶກ</button>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Edit Modal -->
+<div id="batchTimesheetModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity z-50 flex justify-center items-center backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 transform transition-all scale-100 my-8">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-calendar-alt text-blue-600"></i> ປ້ອນເວລາຮຽນ: <span id="batchModalName" class="text-blue-700"></span>
+            </h3>
+            <button id="closeBatchModalIcon" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <p class="text-sm font-medium text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-5" id="batchModalDesc"></p>
+        
+        <input type="hidden" id="batchModalEmployeeId">
+        <input type="hidden" id="batchModalYear">
+        <input type="hidden" id="batchModalMonth">
+        
+        <div class="grid grid-cols-4 md:grid-cols-7 gap-3 mb-6" id="batchDaysContainer">
+            <!-- JS will generate inputs here -->
+        </div>
+        
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
+            <button id="closeBatchModalBtn" class="w-full sm:w-auto px-5 py-2.5 bg-white border-2 border-gray-200 font-semibold rounded-lg text-gray-700 hover:bg-gray-50 transition-all">ຍົກເລີກ</button>
+            <button id="saveBatchTimesheetBtn" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 font-semibold text-white rounded-lg hover:bg-blue-700 transition-all flex justify-center items-center gap-2"><i class="fas fa-save"></i> ບັນທຶກທັງໝົດ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- Single Cell Edit Logic ---
+        const cells = document.querySelectorAll('.timesheet-cell');
+        const modal = document.getElementById('timesheetModal');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalHours = document.getElementById('modalHours');
+        const btnSave = document.getElementById('saveTimesheetBtn');
+        const btnClose = document.getElementById('closeModalBtn');
+        const iconClose = document.getElementById('closeModalIcon');
+        
+        let currentEditingCell = null;
+
+        function openModal(employeeId, employeeName, day, month, year, currentHours, cellElement) {
+            currentEditingCell = cellElement;
+            document.getElementById('modalEmployeeId').value = employeeId;
+            document.getElementById('modalYear').value = year;
+            document.getElementById('modalMonth').value = month;
+            document.getElementById('modalDay').value = day;
+            
+            modalDesc.innerHTML = `<span class="block text-sm text-gray-500 mb-1">ວັນທີ ${day}/${month}/${year}</span><span class="font-bold text-gray-800">${employeeName}</span>`;
+            modalHours.value = currentHours;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => { modalHours.focus(); }, 100);
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            currentEditingCell = null;
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', function() {
+                const currentVal = this.getAttribute('data-current');
+                const employeeId = this.getAttribute('data-employee-id');
+                const day = this.getAttribute('data-day');
+                const year = "{{ year }}";
+                const month = "{{ month }}";
+                
+                // Extract employee name from the preceding sibling elements or closest row context
+                const row = this.closest('tr');
+                const employeeName = row.querySelector('td:nth-child(2)').innerText;
+
+                openModal(employeeId, employeeName, day, month, year, currentVal, this);
+            });
+        });
+
+        const handleSave = function() {
+            const employeeId = document.getElementById('modalEmployeeId').value;
+            const year = document.getElementById('modalYear').value;
+            const month = document.getElementById('modalMonth').value;
+            const day = document.getElementById('modalDay').value;
+            const newHours = modalHours.value;
+            
+            // disable button briefly
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ກຳລັງບັນທຶກ...';
+
+            fetch("{% url 'hr:update_timesheet' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    employee_id: employeeId,
+                    year: year,
+                    month: month,
+                    day: day,
+                    hours: newHours
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert("ເກີດຂໍ້ຜິດພາດ: " + data.message);
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = '<i class="fas fa-save"></i> ບັນທຶກ';
+                }
+            })
+            .catch((e) => {
+                alert("ລະບົບຕອບສະໜອງຜິດພາດ.");
+                btnSave.disabled = false;
+                btnSave.innerHTML = '<i class="fas fa-save"></i> ບັນທຶກ';
+            });
+        };
+
+        btnSave.addEventListener('click', handleSave);
+        btnClose.addEventListener('click', closeModal);
+        iconClose.addEventListener('click', closeModal);
+        
+        modalHours.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleSave();
+        });
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+        
+        // --- Batch Editing Logic ---
+        const batchModal = document.getElementById('batchTimesheetModal');
+        const closeBatchBtn = document.getElementById('closeBatchModalBtn');
+        const closeBatchIcon = document.getElementById('closeBatchModalIcon');
+        const saveBatchBtn = document.getElementById('saveBatchTimesheetBtn');
+        
+        function closeBatchModal() {
+            batchModal.classList.add('hidden');
+        }
+        closeBatchBtn.addEventListener('click', closeBatchModal);
+        closeBatchIcon.addEventListener('click', closeBatchModal);
+        batchModal.addEventListener('click', function(e) {
+            if (e.target === batchModal) closeBatchModal();
+        });
+        
+        // Setup clicking on employee name
+        document.querySelectorAll('td:nth-child(2) a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const row = this.closest('tr');
+                const dayCells = row.querySelectorAll('.timesheet-cell');
+                const firstCell = dayCells[0];
+                if (!firstCell) return;
+                
+                const employeeId = firstCell.getAttribute('data-employee-id');
+                const employeeName = this.innerText;
+                const year = "{{ year }}";
+                const month = "{{ month }}";
+                const numDays = {{ days_range|length }};
+                
+                document.getElementById('batchModalEmployeeId').value = employeeId;
+                document.getElementById('batchModalYear').value = year;
+                document.getElementById('batchModalMonth').value = month;
+                document.getElementById('batchModalName').innerText = employeeName;
+                document.getElementById('batchModalDesc').innerHTML = `<i class="fas fa-calendar"></i> ເດືອນ: <b>${month}/${year}</b> <span class="ml-2 text-xs text-blue-500">(ສາມາດປ້ອນຊົ່ວໂມງລົງໃນປ່ອງວັນທີຕ່າງໆໄດ້ເລີຍ)</span>`;
+                
+                const container = document.getElementById('batchDaysContainer');
+                container.innerHTML = '';
+                
+                for(let i=1; i<=numDays; i++) {
+                    const currentVal = dayCells[i-1].getAttribute('data-current') || '';
+                    container.innerHTML += `
+                        <div class="flex flex-col bg-gray-50 border border-gray-200 rounded p-2">
+                            <label class="text-xs font-bold text-gray-500 mb-1 text-center">ວັນທີ ${i}</label>
+                            <input type="number" step="0.5" class="batch-day-input w-full border border-gray-300 rounded px-2 py-2 text-center text-blue-700 font-bold focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors" data-day="${i}" value="${currentVal}">
+                        </div>
+                    `;
+                }
+                
+                batchModal.classList.remove('hidden');
+            });
+        });
+        
+        // Handle batch save
+        saveBatchBtn.addEventListener('click', function() {
+            const employeeId = document.getElementById('batchModalEmployeeId').value;
+            const year = document.getElementById('batchModalYear').value;
+            const month = document.getElementById('batchModalMonth').value;
+            
+            const updates = [];
+            document.querySelectorAll('.batch-day-input').forEach(input => {
+                updates.push({
+                    day: input.getAttribute('data-day'),
+                    hours: input.value
+                });
+            });
+            
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ກຳລັງບັນທຶກ...';
+            
+            fetch("{% url 'hr:batch_update_timesheet' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    employee_id: employeeId,
+                    year: year,
+                    month: month,
+                    updates: updates
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    window.location.reload();
+                } else {
+                    alert("ເກີດຂໍ້ຜິດພາດ: " + data.message);
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-save"></i> ບັນທຶກທັງໝົດ';
+                }
+            }).catch(e => {
+                alert("ລະບົບຕອບສະໜອງຜິດພາດ.");
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-save"></i> ບັນທຶກທັງໝົດ';
+            });
+        });
+    });
+</script>
+{% endblock %}

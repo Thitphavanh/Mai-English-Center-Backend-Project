@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}ລາຍຊື່ນັກຮຽນທັງໝົດປະຈຳເດືອນ | MAI English Center{% endblock %}
+
+{% block content %}
+<!-- Additional Global CSS overrides for the matrix -->
+<style>
+    .table-container { overflow-x: auto; margin-bottom: 3rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); border-radius: 8px; }
+    .roster-table { border-collapse: collapse; min-width: max-content; width: 100%; font-size: 15px; }
+    .roster-table th, .roster-table td { border: 1px solid #d1d5db; padding: 6px 12px; text-align: center; } /* Tailwin border-gray-300 */
+    .scholarship-green { background-color: #10b981 !important; color: white !important; } /* A much softer premium green than #00b050 */
+    
+    /* Layout styling tailored for the portal */
+    h1.title-header {
+        background-color: #fde047; /* Tailwin yellow-300 */
+        color: #1e3a8a;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        padding: 12px;
+        margin: 0;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        border-bottom: none;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    /* Search highlight animation */
+    @keyframes highlight {
+        0% { transform: scale(1); background-color: inherit; border-color: inherit;}
+        50% { transform: scale(1.1); background-color: #fbbf24; border-color: #b45309; z-index: 10; font-weight: bold; box-shadow: 0 0 10px rgba(251,191,36,0.8); }
+        100% { transform: scale(1); background-color: #fef3c7; border-color: #d97706; }
+    }
+    .search-match {
+        animation: highlight 1s ease-out;
+        background-color: #fef3c7 !important; /* light yellow bg */
+        color: #b45309 !important; /* dark orange text */
+        border: 2px solid #b45309 !important; /* thick border */
+        font-weight: bold !important;
+        position: relative;
+    }
+</style>
+
+<div class="max-w-[1200px] mx-auto px-4 py-8">
+    
+    <!-- Search Bar Section -->
+    <div class="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="w-full sm:w-1/2">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">🔍 ຄົ້ນຫານັກຮຽນໃນຕາຕະລາງ</h2>
+            <p class="text-sm text-gray-500 mb-2">ພິມຊື່, ຊື່ຫຼິ້ນ, ຫຼື ລະຫັດນັກຮຽນ (ID) ເພື່ອໄຮໄລ້ (Highlight) ຕຳແໜ່ງໃນແຖວທັນທີ.</p>
+        </div>
+        <div class="w-full sm:w-1/2">
+            <div class="relative">
+                <input type="text" id="rosterSearch" placeholder="ພິມ ຊື່, ຊື່ຫຼິ້ນ ຫຼື ID (ເຊັ່ນ A001 ຫຼື LINA)..." 
+                       class="w-full pl-10 pr-4 py-3 border-2 border-blue-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition bg-blue-50/50 text-gray-800">
+                <svg class="w-5 h-5 text-blue-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <div id="searchResultText" class="text-sm font-semibold text-green-600 mt-2 hidden">ພົບຂໍ້ມູນ...</div>
+        </div>
+    </div>
+
+    <!-- WEEKDAY MATRIX -->
+    <div class="mb-8">
+        <h1 class="title-header">ອັບເດດລາຍຊື່ນັກຮຽນທັງໝົດປະຈຳເດືອນ 03 (ຈັນ-ພະຫັດ)</h1>
+        <div class="table-container bg-white">
+            <table class="roster-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="bg-gray-100 text-red-600 font-bold" style="width: 50px;">ລໍາດັບ</th>
+                        <th colspan="3" class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">Class A</th>
+                        <th colspan="2" class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">Class B</th>
+                        <th colspan="2" class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">Class C</th>
+                        <th colspan="1" class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">Class D</th>
+                    </tr>
+                    <tr class="bg-[#fcd556] text-gray-900">
+                        <th class="font-bold">5:30-6:30</th>
+                        <th class="font-bold">6.30-7.30</th>
+                        <th class="font-bold">6.30-7.30</th>
+                        <th class="font-bold">5:30-6:30</th>
+                        <th class="font-bold">6.30-7.30</th>
+                        <th class="font-bold">5:30-6:30</th>
+                        <th class="font-bold">6.30-7.30</th>
+                        <th class="font-bold">5:30-6:30</th>
+                    </tr>
+                </thead>
+                <tbody id="weekdayBody">
+                    {% for row in reg_rows %}
+                        <tr class="hover:bg-blue-50 transition duration-150">
+                            <td class="bg-gray-50 font-bold text-gray-700">{{ forloop.counter }}</td>
+                            {% for cell in row %}
+                                <td class="student-cell transition duration-300 {% if cell.green %}scholarship-green font-bold{% else %}bg-transparent text-gray-800{% endif %}"
+                                    data-id="{{ cell.student_id|upper }}"
+                                    data-name="{{ cell.full_name|upper }} {{ cell.name|upper }}">
+                                    {% if cell.name %}
+                                        {% if cell.student_id %}
+                                            <a href="{% url 'home:student_detail' cell.student_id %}" class="flex flex-col items-center justify-center hover:scale-110 hover:text-blue-600 transition duration-200 cursor-pointer w-full h-full">
+                                                <span>{{ cell.name }}</span>
+                                                <span class="text-[10px] opacity-70 block mt-[-2px]">{{ cell.student_id }}</span>
+                                            </a>
+                                        {% else %}
+                                            <div class="flex flex-col items-center justify-center">
+                                                <span>{{ cell.name }}</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    
+                    <tr class="bg-gray-50">
+                        <td class="font-bold text-gray-700"></td>
+                        {% for total in reg_totals %}
+                            <td class="font-bold bg-[#fcd556] text-red-600 text-lg">{{ total }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="font-bold bg-[#fcd556] text-gray-800 text-lg">ລວມ</td>
+                        <td colspan="8" class="font-bold text-red-600 bg-white text-left pl-8 text-2xl drop-shadow-sm">{{ reg_sum }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- WEEKEND MATRIX -->
+    <div class="mb-4">
+        <h1 class="title-header">ອັບເດດລາຍຊື່ນັກຮຽນທັງໝົດ ປະຈຳເດືອນ 03 (ເສົາ-ທິດ)</h1>
+        <div class="table-container bg-white">
+            <table class="roster-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="bg-gray-100 text-red-600 font-bold" style="width: 50px;">ລໍາດັບ</th>
+                        <th class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">ເສົາ-ທິດ A</th>
+                        <th class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">ເສົາ-ທິດ B</th>
+                        <th class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">ເສົາ-ທິດ C</th>
+                        <th class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">ເສົາ-ທິດ D</th>
+                        <th class="text-red-600 bg-gray-50 text-lg font-normal border-b-0">ເສົາ-ທິດ E</th>
+                        <th class="text-orange-600 bg-gray-50 text-lg font-normal border-b-0">E ພາສາຈີນ</th>
+                    </tr>
+                    <tr class="bg-[#fcd556] text-gray-900">
+                        <th class="font-bold">10.00-12.00</th>
+                        <th class="font-bold">10.00-12.00</th>
+                        <th class="font-bold">10.00-12.00</th>
+                        <th class="font-bold">10.00-12.00</th>
+                        <th class="font-bold">10.00-12.00</th>
+                        <th class="font-bold">06.00-07.00</th>
+                    </tr>
+                </thead>
+                <tbody id="weekendBody">
+                    {% for row in wk_rows %}
+                        <tr class="hover:bg-blue-50 transition duration-150">
+                            <td class="bg-gray-50 font-bold text-gray-700">{{ forloop.counter }}</td>
+                            {% for cell in row %}
+                                <td class="student-cell transition duration-300 {% if cell.green %}scholarship-green font-bold{% else %}bg-transparent text-gray-800{% endif %}"
+                                    data-id="{{ cell.student_id|upper }}"
+                                    data-name="{{ cell.full_name|upper }} {{ cell.name|upper }}">
+                                    {% if cell.name %}
+                                        {% if cell.student_id %}
+                                            <a href="{% url 'home:student_detail' cell.student_id %}" class="flex flex-col items-center justify-center hover:scale-110 hover:text-blue-600 transition duration-200 cursor-pointer w-full h-full">
+                                                <span>{{ cell.name }}</span>
+                                                <span class="text-[10px] opacity-70 block mt-[-2px]">{{ cell.student_id }}</span>
+                                            </a>
+                                        {% else %}
+                                            <div class="flex flex-col items-center justify-center">
+                                                <span>{{ cell.name }}</span>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    
+                    <tr class="bg-gray-50">
+                        <td class="font-bold text-gray-700"></td>
+                        {% for total in wk_totals %}
+                            <td class="font-bold bg-[#fcd556] text-red-600 text-lg">{{ total }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="font-bold bg-[#fcd556] text-gray-800 text-lg">ລວມ</td>
+                        <td colspan="6" class="font-bold text-red-600 bg-white text-left pl-8 text-2xl drop-shadow-sm">{{ wk_sum }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Search JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('rosterSearch');
+        const searchResultText = document.getElementById('searchResultText');
+        const allCells = document.querySelectorAll('.student-cell');
+
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.toUpperCase().trim();
+            
+            // reset all match states
+            allCells.forEach(cell => {
+                cell.classList.remove('search-match');
+            });
+
+            if (query.length < 2) {
+                // don't search if less than 2 chars
+                searchResultText.classList.add('hidden');
+                return;
+            }
+
+            let matchCount = 0;
+
+            allCells.forEach(cell => {
+                const sid = cell.dataset.id || '';
+                const sname = cell.dataset.name || '';
+                
+                if (sid === '' && sname === '') return; // Skip empty cells
+
+                if (sid.includes(query) || sname.includes(query)) {
+                    cell.classList.add('search-match');
+                    matchCount++;
+                    
+                    // scroll to the first match
+                    if (matchCount === 1) {
+                        cell.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    }
+                }
+            });
+
+            if (matchCount > 0) {
+                searchResultText.textContent = `ພົບຂໍ້ມູນ ${matchCount} ລາຍການ ທີ່ຕົງກັບການຄົ້ນຫາ!`;
+                searchResultText.classList.remove('hidden');
+                searchResultText.classList.remove('text-red-500');
+                searchResultText.classList.add('text-green-600');
+            } else {
+                searchResultText.textContent = `ບໍ່ພົບຂໍ້ມູນນັກຮຽນໃນຕາຕະລາງ...`;
+                searchResultText.classList.remove('hidden');
+                searchResultText.classList.remove('text-green-600');
+                searchResultText.classList.add('text-red-500');
+            }
+        });
+    });
+</script>
+
+{% endblock %}

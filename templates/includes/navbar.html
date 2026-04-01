@@ -1,4 +1,5 @@
 <!-- Navbar -->
+{% load i18n %}
 <nav class="bg-black/95 backdrop-blur-md sticky top-0 z-50 border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
@@ -14,13 +15,31 @@
 
             <!-- Desktop Menu -->
             <div class="hidden md:flex space-x-8 items-center mt-1">
-                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">Home</a>
-                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">Courses</a>
-                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">About Us</a>
-                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">Contact</a>
+                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">{% trans 'Home' %}</a>
+                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">{% trans 'Courses' %}</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'home:portal_dashboard' %}" class="text-gray-300 hover:text-brand transition-colors font-medium">{% trans 'Dashboard' %}</a>
+                {% endif %}
+                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">{% trans 'About Us' %}</a>
+                <a href="#" class="text-gray-300 hover:text-brand transition-colors font-medium">{% trans 'Contact' %}</a>
                 <a href="#" class="bg-brand hover:bg-brand-light text-white px-5 py-2.5 rounded-full font-semibold transition-transform transform hover:-translate-y-0.5 shadow-md shadow-brand/30">
-                    Apply Now
+                    {% trans 'Apply Now' %}
                 </a>
+                <!-- Language Switcher -->
+                <form action="{% url 'set_language' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ redirect_to }}">
+                    <select name="language" onchange="this.form.submit()" class="bg-dark text-gray-300 border border-gray-700 rounded-md py-1 px-2 focus:outline-none focus:ring-1 focus:ring-brand text-sm cursor-pointer hover:bg-gray-800">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        {% for language in languages %}
+                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                                {{ language.name_local }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
             </div>
 
             <!-- Mobile Menu Button -->

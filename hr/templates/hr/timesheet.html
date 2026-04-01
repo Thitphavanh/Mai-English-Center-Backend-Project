@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto mt-10">
+    <h2 class="text-2xl font-bold mb-5">ບັນທຶກວັນເຮັດວຽກ ແລະ ຄິດໄລ່ຄ່າແຮງ</h2>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md mb-10">
+        <h3 class="text-xl font-semibold mb-3">ເພີ່ມຂໍ້ມູນໃໝ່</h3>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium">ພະນັກງານ</label>
+                    {{ form.employee }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">ວັນທີ</label>
+                    {{ form.date }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">ຊົ່ວໂມງທີ່ເຮັດວຽກ</label>
+                    {{ form.hours_worked }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">ໝາຍເຫດ</label>
+                    {{ form.remark }}
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">ບັນທຶກ (Save)</button>
+        </form>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-3">ຕາຕະລາງປະຫວັດ</h3>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-100 border-b">
+                    <th class="p-3">ພະນັກງານ</th>
+                    <th class="p-3">ວັນທີ</th>
+                    <th class="p-3">ຊົ່ວໂມງ</th>
+                    <th class="p-3">ໝາຍເຫດ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in timesheets %}
+                <tr class="border-b">
+                    <td class="p-3">{{ t.employee.user.first_name }}</td>
+                    <td class="p-3">{{ t.date|date:"d/m/Y" }}</td>
+                    <td class="p-3">{{ t.hours_worked }}</td>
+                    <td class="p-3">{{ t.remark|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="p-3 text-center text-gray-500">ບໍ່ມີຂໍ້ມູນ</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">ລາຍຊື່ນັກຮຽນ ແລະ ຄ່າຮຽນປະຈຳຫ້ອງ</h2>
+            <p class="text-gray-600">ປະຈຳເດືອນ: {{ current_month }}</p>
+        </div>
+        <form method="get" class="flex space-x-2">
+            <input type="text" name="month" value="{{ current_month }}" class="border p-2 rounded w-32" placeholder="MM/YYYY">
+            <input type="number" name="class_id" class="border p-2 rounded w-24" placeholder="Class ID">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">ຄົ້ນຫາ</button>
+        </form>
+    </div>
+
+    <!-- Table Format matching User's Excel Request -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-100 text-sm">
+                    <th class="p-3 border">No.</th>
+                    <th class="p-3 border">ID STUDENT</th>
+                    <th class="p-3 border">First name</th>
+                    <th class="p-3 border">Nick Name</th>
+                    <th class="p-3 border">Phone number</th>
+                    <th class="p-3 border text-center">TUITION FEE (500,000)</th>
+                    <th class="p-3 border">Remark</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in enrollments %}
+                <tr class="border hover:bg-gray-50 text-sm">
+                    <td class="p-3 border text-center">{{ forloop.counter }}</td>
+                    <td class="p-3 border font-semibold text-gray-700">{{ enrollment.student.student_id|default:"-" }}</td>
+                    <td class="p-3 border">{{ enrollment.student.full_name }}</td>
+                    <td class="p-3 border">{{ enrollment.student.nick_name|default:"-" }}</td>
+                    <td class="p-3 border">{{ enrollment.student.phone_number|default:"-" }}</td>
+                    
+                    <!-- Handle Tuition Status for the particular month -->
+                    {% with fee=enrollment.tuition_fees.first %}
+                    <td class="p-3 border text-center font-bold">
+                        {% if fee and fee.month == current_month %}
+                            {% if fee.status == 'P' %}
+                                <span class="text-green-600"><i class="fas fa-check-circle"></i> ຈ່າຍແລ້ວ</span>
+                            {% elif fee.status == 'T' %}
+                                <span class="text-yellow-600"><i class="fas fa-adjust"></i> ຈ່າຍບາງສ່ວນ</span>
+                            {% else %}
+                                <span class="text-red-500"><i class="fas fa-times-circle"></i> ຍັງບໍ່ຈ່າຍ</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-red-500"><i class="fas fa-times-circle"></i> ຍັງບໍ່ຈ່າຍ</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-3 border text-xs text-gray-500">
+                        {{ fee.note|default:"" }}
+                    </td>
+                    {% endwith %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="p-6 text-center text-gray-500">
+                        ຍັງບໍ່ມີຂໍ້ມູນນັກຮຽນໃນຫ້ອງນີ້ ຫຼື ຍັງບໍ່ໄດ້ເລືອກ Class ID.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

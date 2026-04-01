@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Register | MAI Back Office</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen font-sans py-12">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-700">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-600/20 text-emerald-500 mb-4">
+                <i class="fas fa-user-plus text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">ລົງທະບຽນພະນັກງານ</h1>
+            <p class="text-gray-400 text-sm">ສ້າງບັນຊີໃໝ່ເພື່ອເຂົ້າລະບົບຫຼັງບ້ານ</p>
+        </div>
+        
+        {% if error %}
+        <div class="bg-red-500/10 text-red-500 border border-red-500/20 p-4 rounded-lg mb-6 text-sm flex items-start">
+            <i class="fas fa-exclamation-triangle mt-0.5 mr-2"></i> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <div class="mb-5">
+                <label class="block text-gray-300 text-sm font-semibold mb-2" for="first_name">ຊື່ເຕັມ-ນາມສະກຸນ (Full Name)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-id-card text-gray-500"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-700 text-white placeholder-gray-400 transition" id="first_name" name="first_name" type="text" placeholder="ຊື່ ແລະ ນາມສະກຸນ" value="{{ request.POST.first_name|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-gray-300 text-sm font-semibold mb-2" for="username">ຊື່ຜູ້ໃຊ້ (Username)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user-tie text-gray-500"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-700 text-white placeholder-gray-400 transition" id="username" name="username" type="text" placeholder="e.g. somchai_hr" value="{{ request.POST.username|default:'' }}" required>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">ໃຊ້ສຳລັບລັອກອິນເຂົ້າລະບົບດັ່ງກ່າວນີ້</p>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-300 text-sm font-semibold mb-2" for="password">ຕັ້ງລະຫັດຜ່ານໃໝ່ (Password)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-500"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-gray-700 text-white placeholder-gray-400 transition" id="password" name="password" type="password" placeholder="••••••••" required>
+                </div>
+            </div>
+            
+            <!-- Warning Alert -->
+            <div class="bg-amber-500/10 border-l-4 border-amber-500 p-4 mb-6 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-amber-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-amber-400">
+                            ບັນຊິນີ້ຈະໄດ້ຮັບສິດທິອະນຸຍາດເປັນແອດມິນ (Staff) ເພື່ອເຂົ້າຈັດການລະບົບຫຼັງບ້ານທັນທີ. ສະຫງວນສິດໃຫ້ສະເພາະພະນັກງານ MAI ເທົ່ານັ້ນ.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition shadow-lg flex items-center justify-center mb-6" type="submit">
+                <i class="fas fa-check-circle mr-2"></i> ສ້າງບັນຊີ (Create Account)
+            </button>
+            
+            <div class="text-center font-medium text-sm text-gray-400 border-t border-gray-700 pt-6">
+                ກັບໄປ <a href="{% url 'backoffice:login' %}" class="text-emerald-400 hover:text-emerald-300 transition ml-1">ໜ້າເຂົ້າສູ່ລະບົບ</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

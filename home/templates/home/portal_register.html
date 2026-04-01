@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal Register | MAI English Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen font-sans py-12">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-gray-100">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Register Portal</h1>
+            <p class="text-gray-500 text-sm">ລົງທະບຽນເປີດນຳໃຊ້ລະບົບຜູ້ປົກຄອງ</p>
+        </div>
+        
+        {% if error %}
+        <div class="bg-red-50 text-red-600 p-4 rounded-lg mb-6 text-sm flex items-start shadow-sm leading-relaxed">
+            <i class="fas fa-exclamation-circle mt-0.5 mr-2"></i> {{ error }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="">
+            {% csrf_token %}
+            
+            <div class="mb-5">
+                <label class="block text-gray-700 text-sm font-semibold mb-2" for="student_id">ໄອດີນັກຮຽນ (Student ID)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-hashtag text-gray-300"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow bg-gray-50 focus:bg-white" id="student_id" name="student_id" type="text" placeholder="e.g. 00609" value="{{ request.POST.student_id|default:'' }}" required>
+                </div>
+                <p class="text-xs text-gray-400 mt-1 mt-1">ໄອດີນັກຮຽນດັ່ງກ່າວຈະຖືກນຳໃຊ້ເປັນ Username ເຂົ້າສູ່ລະບົບ</p>
+            </div>
+
+            <div class="mb-5">
+                <label class="block text-gray-700 text-sm font-semibold mb-2" for="phone">ເບີໂທລະສັບ (Phone Number)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-phone text-gray-300"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow bg-gray-50 focus:bg-white" id="phone" name="phone" type="text" placeholder="e.g. 020 9xxxxxxx" value="{{ request.POST.phone|default:'' }}" required>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">ກະລຸນາປ້ອນເບີໂທໃຫ້ກົງກັບທີ່ມອບໃຫ້ໂຮງຮຽນເພື່ອຢືນຢັນໂຕຕົນ</p>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-gray-700 text-sm font-semibold mb-2" for="parent_name">ຊື່ຜູ້ປົກຄອງ (Parent Name)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user-circle text-gray-300"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow bg-gray-50 focus:bg-white" id="parent_name" name="parent_name" type="text" placeholder="ຊື່ຂອງທ່ານ" value="{{ request.POST.parent_name|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-gray-700 text-sm font-semibold mb-2" for="password">ຕັ້ງລະຫັດຜ່ານໃໝ່ (Create Password)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-gray-300"></i>
+                    </div>
+                    <input class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow bg-gray-50 focus:bg-white" id="password" name="password" type="password" placeholder="••••••••" required>
+                </div>
+            </div>
+            
+            <button class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition transform hover:-translate-y-0.5 shadow-md flex items-center justify-center mb-6" type="submit">
+                <i class="fas fa-user-plus mr-2"></i> ລົງທະບຽນ (Register)
+            </button>
+
+            <div class="text-center font-medium text-sm text-gray-600 border-t border-gray-100 pt-6">
+                ມີບັນຊີແລ້ວບໍ? (Already registered?) <a href="{% url 'home:portal_login' %}" class="text-blue-600 hover:text-blue-800 transition ml-1">ເຂົ້າສູ່ລະບົບ (Login)</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

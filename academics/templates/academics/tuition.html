@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto mt-10">
+    <h2 class="text-2xl font-bold mb-5">ລະບົບເກັບຄ່າຮຽນປະຈຳເດືອນ</h2>
+    
+    <div class="bg-white p-6 rounded-lg shadow-md mb-10">
+        <h3 class="text-xl font-semibold mb-3">ບັນທຶກສະຖານະໃໝ່</h3>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded mt-2">ບັນທຶກ (Save)</button>
+        </form>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold mb-3">ຕາຕະລາງຈ່າຍຄ່າຮຽນ</h3>
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-gray-100 border-b">
+                    <th class="p-3">ລາຍຊື່ນັກຮຽນ</th>
+                    <th class="p-3">ເດືອນ/ປີ</th>
+                    <th class="p-3">ຈຳນວນເງິນ</th>
+                    <th class="p-3">ສະຖານະ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fee in fees %}
+                <tr class="border-b">
+                    <td class="p-3">{{ fee.enrollment.student }}</td>
+                    <td class="p-3">{{ fee.month }}</td>
+                    <td class="p-3">{{ fee.amount|floatformat:0 }} LAK</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 rounded text-white text-xs 
+                            {% if fee.status == 'P' %} bg-green-500
+                            {% elif fee.status == 'U' %} bg-red-500
+                            {% else %} bg-yellow-500 {% endif %}">
+                            {{ fee.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="p-3 text-center text-gray-500">ຍັງບໍ່ມີຂໍ້ມູນ</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

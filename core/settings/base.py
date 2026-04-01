@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Application definition
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -23,6 +24,8 @@ INSTALLED_APPS = [
     # Third-party apps
     "rest_framework",
     "corsheaders",
+    "crispy_forms",
+    "crispy_tailwind",
 
     # Local apps
     "academics",
@@ -31,12 +34,14 @@ INSTALLED_APPS = [
     "home",
     "integrations",
     "users",
+    "backoffice",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -91,13 +96,37 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-LANGUAGE_CODE = "en-us"
+from django.utils.translation import gettext_lazy as _
+
+LANGUAGE_CODE = "lo"
+
+from django.conf.locale import LANG_INFO
+
+EXTRA_LANG_INFO = {
+    'lo': {
+        'bidi': False,
+        'code': 'lo',
+        'name': 'Lao',
+        'name_local': 'ລາວ',
+    },
+}
+
+LANG_INFO.update(EXTRA_LANG_INFO)
+
+LANGUAGES = [
+    ('lo', _('Lao')),
+    ('en', _('English')),
+]
 
 TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -130,3 +159,66 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+# JAZZMIN Settings
+JAZZMIN_SETTINGS = {
+    "site_title": "MAI English Center Admin",
+    "site_header": "MAI English Center",
+    "site_brand": "MAI Analytics",
+    "welcome_sign": "ຍິນດີຕ້ອນຮັບເຂົ້າສູ່ລະບົບຄຸ້ມຄອງ MAI English Center",
+    "search_model": ["auth.User", "academics.Student"],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "academics.Course": "fas fa-book",
+        "academics.ClassSchedule": "fas fa-clock",
+        "academics.Student": "fas fa-user-graduate",
+        "academics.TuitionFee": "fas fa-money-check-alt",
+        "academics.Assessment": "fas fa-clipboard-check",
+        "hr.EmployeeProfile": "fas fa-id-badge",
+        "hr.Timesheet": "fas fa-calendar-check",
+        "hr.PayrollSummary": "fas fa-money-bill-wave",
+    },
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+    "show_ui_builder": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-white navbar-light",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "lumen",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-outline-info",
+        "warning": "btn-outline-warning",
+        "danger": "btn-outline-danger",
+        "success": "btn-outline-success"
+    }
+}
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
+CRISPY_TEMPLATE_PACK = "tailwind"
+

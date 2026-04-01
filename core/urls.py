@@ -21,7 +21,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
+from django.conf.urls.i18n import i18n_patterns
+
 urlpatterns = [
+    path("i18n/", include("django.conf.urls.i18n")),
+]
+
+urlpatterns += i18n_patterns(
     path("admin/", admin.site.urls),
     # Apps URLs
     path("", include("home.urls")),
@@ -30,7 +36,8 @@ urlpatterns = [
     path("hr/", include("hr.urls")),
     path("integrations/", include("integrations.urls")),
     path("users/", include("users.urls")),
-]
+    path("backoffice/", include("backoffice.urls")),
+)
 
 # Media files (development only)
 if settings.DEBUG:

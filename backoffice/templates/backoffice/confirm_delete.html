@@ -1,0 +1,31 @@
+{% extends "backoffice/base.html" %}
+
+{% block title %}Confirm Deletion | MAI English Center{% endblock %}
+{% block header_title %}Confirm Deletion{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden mb-8 max-w-2xl mx-auto mt-10">
+    <div class="p-6 border-b border-red-100 flex items-center bg-red-50 text-red-700">
+        <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
+        <div>
+            <h3 class="text-lg font-bold">Are you absolutely sure?</h3>
+            <p class="text-sm mt-1">This action cannot be undone. This will permanently delete the selected item.</p>
+        </div>
+    </div>
+    
+    <div class="p-8 text-center">
+        <p class="text-gray-700 text-lg mb-4">You are about to delete:</p>
+        <p class="text-2xl font-semibold text-gray-900 mb-8 border-b pb-4">{{ object }}</p>
+        
+        <form method="post" class="flex justify-center space-x-4">
+            {% csrf_token %}
+            <a href="javascript:history.back()" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition shadow-sm font-medium">
+                Cancel
+            </a>
+            <button type="submit" class="px-6 py-2 border border-transparent rounded-lg shadow-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
+                <i class="fas fa-trash-alt mr-2"></i> Yes, delete it
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
