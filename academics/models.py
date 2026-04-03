@@ -39,8 +39,11 @@ class ClassSchedule(models.Model):
 class Student(models.Model):
     """ Model to represent Student profiles from the Excel checklist """
     student_id = models.CharField(max_length=50, blank=True, null=True, help_text="ID STUDENT (e.g., 00601)")
+    profile_image = models.ImageField(upload_to='student_profiles/', blank=True, null=True, help_text="ຮູບພາບໂປຟາຍນັກຮຽນ (Profile Photo)")
     full_name = models.CharField(max_length=255, help_text="NAME AND FAMILY NAME (e.g., ນາງ ມຸກຕຸລາ ເທບປັນຍາ)")
+    full_name_lo = models.CharField(max_length=255, blank=True, null=True, help_text="ຊື່ແທ້ ນາມສະກຸນ ເປັນພາສາລາວ (e.g., ນາງ ມຸກຕຸລາ ເທບປັນຍາ)")
     nick_name = models.CharField(max_length=100, blank=True, null=True, help_text="NICK NAME (e.g., ແມວ)")
+    nick_name_lo = models.CharField(max_length=100, blank=True, null=True, help_text="ຊື່ຫຼິ້ນ ເປັນພາສາລາວ (e.g., ແມວ)")
     phone_number = models.CharField(max_length=50, blank=True, null=True, help_text="Phone number (e.g., 020 96769512)")
     parent = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -109,21 +112,47 @@ class Assessment(models.Model):
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name='assessments')
     evaluator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='evaluations_given', help_text="Professor/Teacher")
     evaluation_date = models.DateField(auto_now_add=True)
-    
-    total_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    gpa = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
-    general_remarks = models.TextField(blank=True, null=True)
+
+    # ---- 4 Score components (total = 100) ----
+    score_activity   = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                           verbose_name="ACTIVITY / ກິດຈະກຳ (/30)",
+                                           help_text="ສູງສຸດ 30 ຄະແນນ (30%)")
+    score_attendance = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                           verbose_name="ATTENDANCE / ເຂົ້າຮຽນ (/20)",
+                                           help_text="ສູງສຸດ 20 ຄະແນນ (20%)")
+    score_quiz       = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                           verbose_name="QUIZ / Monthly Test (/30)",
+                                           help_text="ສູງສຸດ 30 ຄະແນນ (30%)")
+    score_exercise   = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True,
+                                           verbose_name="Exercise / Assignment (/20)",
+                                           help_text="ສູງສຸດ 20 ຄະແນນ (20%)")
+
+    # ---- Computed ----
+    total_score  = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    letter_grade = models.CharField(max_length=5, blank=True, null=True, help_text="A / B+ / C+ / D / F")
+    gpa          = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+
+    general_remarks  = models.TextField(blank=True, null=True)
     listening_remark = models.TextField(blank=True, null=True, verbose_name="Listening Skill")
-    speaking_remark = models.TextField(blank=True, null=True, verbose_name="Speaking Skill")
-    reading_remark = models.TextField(blank=True, null=True, verbose_name="Reading Skill")
-    writing_remark = models.TextField(blank=True, null=True, verbose_name="Writing Skill")
+    speaking_remark  = models.TextField(blank=True, null=True, verbose_name="Speaking Skill")
+    reading_remark   = models.TextField(blank=True, null=True, verbose_name="Reading Skill")
+    writing_remark   = models.TextField(blank=True, null=True, verbose_name="Writing Skill")
 
     class Meta:
         verbose_name = "Assessment (ການປະເມີນຜົນ)"
         verbose_name_plural = "Assessments (ແບບປະເມີນຜົນການຮຽນ)"
 
+    def save(self, *args, **kwargs):
+        parts = [self.score_activity, self.score_attendance, self.score_quiz, self.score_exercise]
+        filled = [float(p) for p in parts if p is not None]
+        if filled:
+            self.total_score = round(sum(filled), 2)
+        self.letter_grade = compute_letter_grade(self.total_score)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Assessment for {self.enrollment.student.full_name} on {self.evaluation_date}"
+
 
 
 class AssessmentCriteria(models.Model):
@@ -188,3 +217,120 @@ class TuitionFee(models.Model):
 
     def __str__(self):
         return f"{self.enrollment.student} - {self.month} - {self.get_status_display()}"
+
+
+def compute_letter_grade(total):
+    """ຄຳນວນ Letter Grade ຈາກຄະແນນລວມ 100"""
+    if total is None:
+        return 'F'
+    total = float(total)
+    if total >= 88:
+        return 'A'
+    elif total >= 75:
+        return 'B+'
+    elif total >= 60:
+        return 'C+'
+    elif total >= 50:
+        return 'D'
+    else:
+        return 'F'
+
+
+class MonthlyScore(models.Model):
+    """
+    ຄະແນນ Letter Grade ປະຈຳເດືອນຂອງນັກຮຽນ
+    ລວມ 4 ໝວດ (ລວມ 100 ຄະແນນ):
+      1. engagement    : ACTIVITY (ກິດຈະກຳ)           30 ຄະແນນ (30%)
+      2. attendance    : ATTENDANCE (ເຂົ້າຮຽນ)         20 ຄະແນນ (20%)
+      3. monthly_test  : QUIZ / Monthly Test          30 ຄະແນນ (30%)
+      4. exercise      : Exercise / Assignment        20 ຄະແນນ (20%)
+                                              ລວມ = 100 ຄະແນນ
+    """
+    enrollment = models.ForeignKey(
+        Enrollment, on_delete=models.CASCADE,
+        related_name='monthly_scores',
+        verbose_name="ນັກຮຽນ / ຫ້ອງ"
+    )
+    month = models.CharField(
+        max_length=7,
+        help_text="MM/YYYY e.g., 03/2026",
+        verbose_name="ເດືອນ"
+    )
+
+    # ---- Score components ----
+    engagement = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        null=True, blank=True,
+        verbose_name="ACTIVITY / ກິດຈະກຳ (/30)",
+        help_text="ຄະແນນກິດຈະກຳ — ສູງສຸດ 30 ຄະແນນ (30%)"
+    )
+    attendance = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        null=True, blank=True,
+        verbose_name="ATTENDANCE / ເຂົ້າຮຽນ (/20)",
+        help_text="ຄະແນນການເຂົ້າຮຽນ — ສູງສຸດ 20 ຄະແນນ (20%)"
+    )
+    monthly_test = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        null=True, blank=True,
+        verbose_name="QUIZ / Monthly Test (/30)",
+        help_text="ຄະແນນ Quiz — ສູງສຸດ 30 ຄະແນນ (30%)"
+    )
+    exercise = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        null=True, blank=True,
+        verbose_name="Exercise / Assignment (/20)",
+        help_text="ຄະແນນການຝຶກ/ວຽກ — ສູງສຸດ 20 ຄະແນນ (20%)"
+    )
+
+    # ---- Computed fields (auto-filled on save) ----
+    activities_total = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        null=True, blank=True,
+        verbose_name="ຄະແນນ 3 ໝວດລວມ (/70)",
+        help_text="Activity(30) + Attendance(20) + Exercise(20) = 70"
+    )
+    total_score = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        null=True, blank=True,
+        verbose_name="ຄະແນນລວມ (/100)"
+    )
+    letter_grade = models.CharField(
+        max_length=5,
+        blank=True, null=True,
+        verbose_name="Letter Grade",
+        help_text="A / B+ / C+ / D / F"
+    )
+
+    evaluator = models.ForeignKey(
+        User, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='monthly_scores_given',
+        verbose_name="ຜູ້ປ້ອນຄະແນນ"
+    )
+    remark = models.TextField(blank=True, null=True, verbose_name="ໝາຍເຫດ")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Monthly Score (ຄະແນນປະຈຳເດືອນ)"
+        verbose_name_plural = "Monthly Scores (ຄະແນນປະຈຳເດືອນທັງໝົດ)"
+        unique_together = ['enrollment', 'month']
+        ordering = ['-month', 'enrollment__student__full_name']
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate activities total
+        act = sum(float(x) for x in [self.exercise, self.attendance, self.engagement] if x is not None)
+        self.activities_total = act if act > 0 else None
+
+        # Auto-calculate total score
+        test = float(self.monthly_test) if self.monthly_test is not None else 0
+        self.total_score = round(act + test, 2)
+
+        # Auto-assign letter grade
+        self.letter_grade = compute_letter_grade(self.total_score)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.enrollment.student.full_name} | {self.month} | {self.total_score} | {self.letter_grade}"

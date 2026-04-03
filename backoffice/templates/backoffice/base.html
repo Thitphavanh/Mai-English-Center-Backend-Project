@@ -69,6 +69,13 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{% url 'home:learning_assessment' %}" target="_blank" class="flex items-center px-6 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition group">
+                            <i class="fas fa-file-signature w-5 text-center mr-3 text-amber-500 group-hover:scale-110 transition"></i>
+                            <span class="font-medium text-amber-100">Learning Assessment</span>
+                            <span class="ml-2 px-1.5 py-0.5 bg-amber-500 text-slate-900 text-[10px] font-bold rounded uppercase">New</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{% url 'backoffice:assessmentcriteria-list' %}" class="flex items-center px-6 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition group">
                             <i class="fas fa-list-ol w-5 text-center mr-3 group-hover:text-blue-400 transition"></i>
                             <span class="font-medium">Assessment Criterias</span>
@@ -78,6 +85,12 @@
                         <a href="{% url 'backoffice:tuitionfee-list' %}" class="flex items-center px-6 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition group">
                             <i class="fas fa-money-bill-wave w-5 text-center mr-3 group-hover:text-blue-400 transition"></i>
                             <span class="font-medium">Tuition Fees (ຄ່າຮຽນ)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'backoffice:monthlyscore-calendar' %}" class="flex items-center px-6 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition group">
+                            <i class="fas fa-chart-bar w-5 text-center mr-3 group-hover:text-yellow-400 transition"></i>
+                            <span class="font-medium">ຄະແນນປະຈຳເດືອນ</span>
                         </a>
                     </li>
 

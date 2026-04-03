@@ -17,15 +17,33 @@ class HourlyRateRole(models.Model):
 
 class EmployeeProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
+    profile_image = models.ImageField(upload_to='employee_profiles/', blank=True, null=True, help_text="ຮູບພາບອາຈານ (Profile Photo)")
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     role = models.ForeignKey(HourlyRateRole, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Bilingual full name
+    full_name_en = models.CharField(max_length=255, blank=True, null=True, verbose_name="ຊື່ນາມສະກຸນ (ອັງກິດ)", help_text="Full Name in English")
+    full_name_lo = models.CharField(max_length=255, blank=True, null=True, verbose_name="ຊື່ນາມສະກຸນ (ລາວ)", help_text="ຊື່ນາມສະກຸນເປັນພາສາລາວ")
+
+    # Bilingual nickname
+    nickname_en = models.CharField(max_length=100, blank=True, null=True, verbose_name="ຊື່ຫລ້ິນ (ອັງກິດ)", help_text="Nickname in English")
+    nickname_lo = models.CharField(max_length=100, blank=True, null=True, verbose_name="ຊື່ຫລ້ິນ (ລາວ)", help_text="ຊື່ຫລ້ິນເປັນພາສາລາວ")
+
+    # Age
+    age = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name="ອາຍຸ", help_text="ອາຍຸ (ປີ)")
+
+    # Background
+    education_background = models.TextField(blank=True, null=True, verbose_name="ປະຫວັດການສຶກສາ", help_text="ຮຽນຈົບມາແຕ່ໃສ (e.g., ມະຫາວິທະຍາໄລ ແຫ່ງຊາດລາວ - ສາຂາພາສາອັງກິດ)")
+    previous_workplace = models.TextField(blank=True, null=True, verbose_name="ບ່ອນເຮັດວຽກປະຈຸບັນ", help_text="ສອນຢູ່ໃສ / ເຄີຍສອນຢູ່ໃສ (e.g., ໂຮງຮຽນ ABC - ຄູສອນພາສາອັງກິດ)")
+    work_experience = models.TextField(blank=True, null=True, verbose_name="ປະສົບການເຮັດວຽກ", help_text="ປະສົບການ ແລະ ທັກສະການສອນ")
 
     class Meta:
         verbose_name = "Employee Profile (ປະຫວັດພະນັກງານ)"
         verbose_name_plural = "Employee Profiles (ປະຫວັດພະນັກງານ)"
 
     def __str__(self):
-        return f"{self.user.get_full_name()} ({self.phone_number})"
+        name = self.full_name_en or self.user.get_full_name() or self.user.username
+        return f"{name} ({self.phone_number})"
 
 
 class Timesheet(models.Model):

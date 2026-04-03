@@ -1,5 +1,10 @@
 from django.urls import path
 from . import views
+from academics.views_monthly_score import (
+    MonthlyScoreCalendarView,
+    MonthlyScoreBulkEntryView,
+    MonthlyScoreDetailView,
+)
 
 app_name = 'backoffice'
 
@@ -37,3 +42,10 @@ urlpatterns += generate_crud_urls('payrollsummary', views.PayrollSummaryList, vi
 # AUTH
 urlpatterns += generate_crud_urls('user', views.UserList, views.UserCreate, views.UserUpdate, views.UserDelete)
 urlpatterns += generate_crud_urls('group', views.GroupList, views.GroupCreate, views.GroupUpdate, views.GroupDelete)
+
+# MONTHLY SCORES
+urlpatterns += [
+    path('monthly-scores/', MonthlyScoreCalendarView.as_view(), name='monthlyscore-calendar'),
+    path('monthly-scores/entry/', MonthlyScoreBulkEntryView.as_view(), name='monthlyscore-entry'),
+    path('monthly-scores/detail/', MonthlyScoreDetailView.as_view(), name='monthlyscore-detail'),
+]

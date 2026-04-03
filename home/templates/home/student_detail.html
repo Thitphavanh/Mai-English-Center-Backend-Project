@@ -1,181 +1,261 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}ປະຫວັດນັກຮຽນ - {{ student.full_name }} | MAI English Center{% endblock %}
+{% block title %}ຄະແນນປະຈຳເດືອນ ແລະ ຜົນປະເມີນ - {{ student.full_name }} | MAI English Center{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-    <!-- Breadcrumb & Header -->
-    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-user-graduate text-blue-600"></i>
-                ຂໍ້ມູນນັກຮຽນ (Student Detail)
-            </h1>
-            <p class="text-gray-500 mt-1">ລາຍງານການເຄື່ອນໄຫວ, ຜົນການຮຽນ ແລະ ຄ່າເທີມ ຂອງນັກຮຽນ.</p>
-        </div>
-        <a href="{% url 'home:class_rosters' %}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm self-start">
-            <i class="fas fa-arrow-left mr-2"></i> ກັບຄືນໜ້າລາຍຊື່ (Back to Rosters)
+<!-- Font overrides for cleaner look -->
+<style>
+    .font-sans-alt { font-family: 'Inter', 'Noto Sans Lao', sans-serif; }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full bg-slate-50 min-h-screen font-sans-alt text-slate-800">
+    
+    <!-- CTA / Back Button -->
+    <div class="mb-6">
+        <a href="javascript:history.back()" class="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-blue-600 transition-all shadow-sm">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            ກັບຄືນໜ້າຫຼັກ (Back)
         </a>
     </div>
 
-    <!-- Student Info Card -->
-    <div class="bg-white shadow-md rounded-2xl border border-gray-100 overflow-hidden mb-8 transition hover:shadow-lg">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl shadow-md border-2 border-white">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-900">{{ student.full_name }} {% if student.nick_name %}<span class="text-blue-600">({{ student.nick_name }})</span>{% endif %}</h2>
-                    <div class="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-600 font-medium">
-                        <span class="bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm"><i class="fas fa-id-card text-gray-400 mr-1"></i> ID: {{ student.student_id }}</span>
-                        <span class="bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm"><i class="fas fa-phone text-gray-400 mr-1"></i> ໂທ: {{ student.phone_number|default:"-" }}</span>
-                    </div>
+    <!-- Student Profile Card -->
+    <div class="bg-gradient-to-br from-indigo-600 via-blue-600 to-sky-500 rounded-[2rem] shadow-xl overflow-hidden mb-8 text-white relative">
+        <div class="absolute top-0 right-[-20%] p-8 opacity-10 pointer-events-none transform rotate-12">
+            <i class="fas fa-user-graduate text-[12rem]"></i>
+        </div>
+        <div class="p-8 relative z-10 flex flex-col items-center sm:items-start sm:flex-row gap-6">
+            <div class="w-24 h-24 rounded-full border-4 border-white/30 shadow-inner shrink-0 overflow-hidden bg-white/20 backdrop-blur-md flex items-center justify-center">
+                {% if student.profile_image %}
+                    <img src="{{ student.profile_image.url }}" alt="{{ student.full_name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <span class="text-5xl leading-none">👩‍🎓</span>
+                {% endif %}
+            </div>
+            <div class="text-center sm:text-left flex-1">
+                <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                    <i class="fas fa-chart-bar"></i> ຄະແນນປະຈຳເດືອນ ແລະ ຜົນປະເມີນ
+                </p>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-wide mb-1">
+                    {{ student.full_name }} 
+                </h1>
+                {% if student.nick_name %}
+                <p class="text-blue-100 font-medium text-lg mb-3">({{ student.nick_name }})</p>
+                {% endif %}
+                <div class="flex flex-col sm:flex-row gap-2 mt-4 text-sm font-medium">
+                    <span class="bg-black/20 px-3 py-2 rounded-xl backdrop-blur-sm shadow-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-id-card text-blue-200"></i>
+                        Student ID: <span class="font-bold">{{ student.student_id }}</span>
+                    </span>
+                    <span class="bg-black/20 px-3 py-2 rounded-xl backdrop-blur-sm shadow-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-phone text-blue-200"></i>
+                        ໂທ: <span class="font-bold">{{ student.phone_number|default:"-" }}</span>
+                    </span>
                 </div>
             </div>
         </div>
-        
-        <div class="p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-chalkboard-teacher text-indigo-500 mr-2"></i> ຫ້ອງຮຽນທີ່ລົງທະບຽນ (Enrolled Classes)</h3>
-            
-            {% if not student.enrollments.all %}
-                <div class="bg-gray-50 rounded-xl p-8 text-center border border-dashed border-gray-200">
-                    <i class="fas fa-book text-gray-300 text-4xl mb-3"></i>
-                    <p class="text-gray-500 font-medium text-lg">ຍັງບໍ່ມີຫ້ອງຮຽນ (No classes enrolled)</p>
-                </div>
-            {% else %}
-                <div class="space-y-6">
-                    {% for enrollment in student.enrollments.all %}
-                    <div class="border border-indigo-100 rounded-xl overflow-hidden shadow-sm bg-white">
-                        <div class="bg-indigo-50/70 p-5 border-b border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h4 class="font-bold text-gray-900 text-xl">{{ enrollment.class_schedule.course.name }} <span class="text-indigo-600 text-base font-medium bg-indigo-100 px-2 py-0.5 rounded-md ml-2">{{ enrollment.class_schedule.course.book_name|default:"" }}</span></h4>
-                                <div class="flex flex-wrap gap-4 mt-2">
-                                    <p class="text-sm text-gray-700 flex items-center bg-white px-2 py-1 rounded border border-indigo-50"><i class="far fa-clock text-indigo-500 w-5"></i> ເວລາ: {{ enrollment.class_schedule.time_slot }}</p>
-                                    <p class="text-sm text-gray-700 flex items-center bg-white px-2 py-1 rounded border border-indigo-50"><i class="far fa-user text-indigo-500 w-5"></i> ອາຈານ: 
-                                        <span class="font-semibold ml-1">
-                                        {% if enrollment.class_schedule.teacher %}
-                                            {{ enrollment.class_schedule.teacher.get_full_name|default:enrollment.class_schedule.teacher.username }}
-                                        {% else %}
-                                            ຍັງບໍ່ມີອາຈານສອນ (TBA)
-                                        {% endif %}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="bg-white border border-gray-200 px-4 py-2.5 rounded-lg inline-flex flex-col items-center justify-center shadow-sm min-w-[140px]">
-                                <span class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">ລົງທະບຽນເມື່ອ</span>
-                                <span class="text-indigo-700 font-bold"><i class="far fa-calendar-check mr-1"></i> {{ enrollment.enrollment_date }}</span>
-                            </div>
-                        </div>
-                        
-                        <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            
-                            <!-- Assessments -->
-                            <div class="bg-blue-50/30 rounded-xl p-4 border border-blue-50">
-                                <h5 class="font-bold text-sm text-blue-900 mb-3 border-b border-blue-100 pb-2 uppercase tracking-wide flex justify-between items-center">
-                                    <span>ຜົນປະເມີນ (Assessments)</span>
-                                    <i class="fas fa-star text-yellow-400"></i>
-                                </h5>
-                                {% if enrollment.assessments.all %}
-                                    <ul class="space-y-2.5">
-                                    {% for asm in enrollment.assessments.all|slice:":5" %}
-                                        <li class="flex flex-col text-sm bg-white p-3 rounded-lg border border-blue-100 shadow-sm mb-2">
-                                            <div class="flex justify-between items-center mb-1">
-                                                <span class="text-gray-600 font-medium whitespace-nowrap"><i class="far fa-calendar-alt mr-1"></i>{{ asm.evaluation_date|date:"d M Y" }}</span>
-                                                <div class="flex gap-2">
-                                                    {% if asm.gpa %}
-                                                        <span class="font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200 shadow-sm">GPA: {{ asm.gpa }}</span>
-                                                    {% endif %}
-                                                    <span class="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md border border-blue-200 shadow-sm">{{ asm.total_score|default:"-" }} / 100</span>
-                                                </div>
-                                            </div>
-                                            {% if asm.general_remarks %}
-                                                <p class="text-[11px] text-gray-500 mt-1.5 italic border-t border-blue-50 pt-1.5 leading-relaxed"><i class="fas fa-quote-left mr-1 text-blue-300"></i>{{ asm.general_remarks }}</p>
-                                            {% endif %}
-                                        </li>
-                                    {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    <div class="text-center py-6 text-gray-400">
-                                        <i class="far fa-clipboard text-2xl mb-2 opacity-50"></i>
-                                        <p class="text-sm italic">ຍັງບໍ່ທັນມີຜົນການປະເມີນ</p>
-                                    </div>
-                                {% endif %}
-                            </div>
+    </div>
 
-                            <!-- Daily Checklists -->
-                            <div class="bg-emerald-50/30 rounded-xl p-4 border border-emerald-50">
-                                <h5 class="font-bold text-sm text-emerald-900 mb-3 border-b border-emerald-100 pb-2 uppercase tracking-wide flex justify-between items-center">
-                                    <span>ການມາຮຽນ (Attendance)</span>
-                                    <i class="fas fa-calendar-check text-emerald-500"></i>
-                                </h5>
-                                {% if enrollment.daily_records.all %}
-                                    <ul class="space-y-2.5">
-                                    {% for dr in enrollment.daily_records.all|slice:":5" %}
-                                        <li class="flex justify-between items-center text-sm p-2.5 rounded-lg border border-emerald-100 bg-white shadow-sm">
-                                            <span class="text-gray-600 font-medium">{{ dr.date|date:"d M Y" }}</span>
-                                            {% if dr.status == "P" %}
-                                                <span class="font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md text-xs">ມາຮຽນ</span>
-                                            {% elif dr.status == "A" %}
-                                                <span class="font-bold text-red-700 bg-red-100 px-2.5 py-1 rounded-md text-xs">ຂາດຮຽນ</span>
-                                            {% elif dr.status == "L" %}
-                                                <span class="font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-md text-xs">ມາສາຍ</span>
-                                            {% else %}
-                                                <span class="font-bold text-gray-700 bg-gray-200 px-2.5 py-1 rounded-md text-xs">ຂໍລາ</span>
-                                            {% endif %}
-                                        </li>
-                                    {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    <div class="text-center py-6 text-gray-400">
-                                        <i class="far fa-calendar-times text-2xl mb-2 opacity-50"></i>
-                                        <p class="text-sm italic">ຍັງບໍ່ມີບັນທຶກການເຂົ້າຮຽນ</p>
-                                    </div>
+    <!-- Classes / Grid 1 -->
+    {% if not student.enrollments.all %}
+        <div class="bg-white rounded-3xl p-10 text-center shadow-sm border border-slate-200">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">📭</div>
+            <p class="text-slate-500 font-medium text-lg">ຍັງບໍ່ມີຫ້ອງຮຽນ</p>
+            <p class="text-sm text-slate-400 mt-1">(No classes enrolled)</p>
+        </div>
+    {% else %}
+        <div class="space-y-8">
+            {% for enrollment in student.enrollments.all %}
+            <div class="bg-white rounded-[2rem] shadow-lg border border-slate-100 overflow-hidden relative">
+                
+                <!-- Class Header info -->
+                <div class="p-6 border-b border-slate-100 bg-gradient-to-b from-slate-50 to-white">
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <p class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                <i class="fas fa-chalkboard-teacher text-indigo-400"></i> ຫ້ອງຮຽນທີ່ລົງທະບຽນ
+                            </p>
+                            <h2 class="text-xl sm:text-2xl font-black text-slate-800 leading-tight">
+                                {{ enrollment.class_schedule.course.name }} 
+                                {% if enrollment.class_schedule.course.book_name %}
+                                <span class="text-indigo-600 block text-lg mt-0.5">({{ enrollment.class_schedule.course.book_name }})</span>
                                 {% endif %}
-                            </div>
-                            
-                            <!-- Tuition Fees -->
-                            <div class="bg-orange-50/30 rounded-xl p-4 border border-orange-50">
-                                <h5 class="font-bold text-sm text-orange-900 mb-3 border-b border-orange-100 pb-2 uppercase tracking-wide flex justify-between items-center">
-                                    <span>ຄ່າຮຽນ (Tuitions)</span>
-                                    <i class="fas fa-file-invoice-dollar text-orange-500"></i>
-                                </h5>
-                                {% if enrollment.tuition_fees.all %}
-                                    <ul class="space-y-2.5">
-                                    {% for tfee in enrollment.tuition_fees.all|slice:":5" %}
-                                        <li class="flex flex-col text-sm p-3 rounded-lg border shadow-sm {% if tfee.payment_date %}bg-white border-green-200{% else %}bg-white border-rose-200{% endif %}">
-                                            <div class="flex justify-between items-center mb-1.5">
-                                                <span class="font-bold {% if tfee.payment_date %}text-gray-800{% else %}text-rose-800{% endif %}">ເດືອນ {{ tfee.month }}</span>
-                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider {% if tfee.payment_date %}text-green-700 bg-green-100{% else %}text-rose-700 bg-rose-100{% endif %}">
-                                                    {% if tfee.payment_date %}✅ ຈ່າຍແລ້ວ{% else %}⚠️ ຍັງບໍ່ຈ່າຍ{% endif %}
-                                                </span>
-                                            </div>
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-xs text-gray-500 font-medium">{% if tfee.payment_date %}{{ tfee.payment_date|date:"d/m/Y" }}{% else %}ກຳນົດ: {{ tfee.due_date|date:"d/m/Y"|default:"-" }}{% endif %}</span>
-                                                <span class="font-bold {% if tfee.payment_date %}text-green-600{% else %}text-rose-600{% endif %}">
-                                                    {{ tfee.amount }} LAK
-                                                </span>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    <div class="text-center py-6 text-gray-400">
-                                        <i class="fas fa-receipt text-2xl mb-2 opacity-50"></i>
-                                        <p class="text-sm italic">ຍັງບໍ່ມີປະຫວັດການຈ່າຍຄ່າຮຽນ</p>
-                                    </div>
-                                {% endif %}
-                            </div>
-
+                            </h2>
                         </div>
                     </div>
-                    {% endfor %}
+                    
+                    <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-3">
+                        <div class="flex items-center gap-3 text-sm text-slate-700">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0"><i class="far fa-clock"></i></div>
+                            <span class="font-medium text-slate-600">ເວລາ:</span>
+                            <span class="font-bold border-b-2 border-indigo-200">{{ enrollment.class_schedule.time_slot }}</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-slate-700">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0"><i class="far fa-user"></i></div>
+                            <div>
+                                <span class="font-medium text-slate-600">ອາຈານ: {% if enrollment.class_schedule.teacher %} {{ enrollment.class_schedule.teacher.get_full_name|default:enrollment.class_schedule.teacher.username }}</span>
+                                <a href="{% url 'home:teacher_profile' enrollment.class_schedule.teacher.id %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg transition-all shadow-sm">
+                                    <i class="fas fa-user-circle"></i> ເບິ່ງປະຫວັດອາຈານ
+                                </a>
+                                {% else %}
+                                <span class="font-bold">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-slate-700">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0"><i class="far fa-calendar-check"></i></div>
+                            <span class="font-medium text-slate-600">ລົງທະບຽນ:</span>
+                            <span class="font-bold">{{ enrollment.enrollment_date|date:"F j, Y" }}</span>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
+
+                <!-- 1 Grid Layout for the 3 sections -->
+                <div class="px-6 py-8 flex flex-col gap-8">
+                    
+                    <!-- Latest Evaluation Section -->
+                    <div class="relative">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center relative translate-y-[-1px]">
+                                <i class="fas fa-star text-sm"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800 tracking-wide">
+                                ຜົນປະເມີນລ່າສຸດ
+                            </h3>
+                        </div>
+
+                        {% if enrollment.assessments.all %}
+                            {% with asm=enrollment.assessments.all|first %}
+                            <div class="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-100 rounded-2xl p-5 shadow-sm relative transition-all hover:shadow-md">
+                                <div class="flex justify-between flex-wrap gap-4 items-center mb-1">
+                                    <span class="text-blue-900 font-bold text-sm">Scores ຄະແນນ</span>
+                                    <span class="text-3xl font-black text-blue-700 px-3 py-1 flex items-baseline">
+                                        {{ asm.total_score|default:"0"|floatformat:0 }}<span class="text-lg text-blue-400 ml-0.5">/100</span>
+                                    </span>
+                                </div>
+                                {% if asm.gpa %}
+                                <div class="flex justify-between items-center pt-3 border-t border-blue-200/50">
+                                    <span class="text-blue-900 font-bold text-sm">GPA ເກຣດສະເລ່ຍ</span>
+                                    <span class="text-lg font-black text-white bg-indigo-500 shadow-md shadow-indigo-500/20 px-4 py-1 rounded-xl tracking-wider">{{ asm.gpa }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endwith %}
+                        {% else %}
+                            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-center shadow-inner">
+                                <span class="text-slate-400 text-sm font-medium">ຍັງບໍ່ມີຜົນປະເມີນ</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-b border-dashed border-slate-200"></div>
+
+                    <!-- Latest Attendance Section -->
+                    <div class="relative">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center relative translate-y-[-1px]">
+                                <i class="fas fa-clipboard-check text-sm"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800 tracking-wide">
+                                ການມາຮຽນລ່າສຸດ
+                            </h3>
+                        </div>
+
+                        {% if enrollment.daily_records.all %}
+                            <div class="space-y-3">
+                            {% for dr in enrollment.daily_records.all|slice:":2" %}
+                                <div class="flex items-center justify-between p-4 rounded-2xl border transition-all hover:translate-x-1 {% if dr.status == 'P' %}bg-emerald-50 border-emerald-100{% elif dr.status == 'A' %}bg-rose-50 border-rose-100{% elif dr.status == 'L' %}bg-amber-50 border-amber-100{% else %}bg-slate-50 border-slate-100{% endif %} shadow-sm">
+                                    <div class="font-bold text-slate-700 flex items-center gap-2.5 text-sm">
+                                        <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center border border-slate-100">
+                                            <i class="far fa-calendar-alt text-slate-400"></i>
+                                        </div>
+                                        {{ dr.date|date:"j M Y" }}
+                                    </div>
+                                    <div class="text-right">
+                                        {% if dr.status == "P" %}
+                                            <span class="font-bold text-emerald-700 flex items-center gap-1.5 text-sm"><i class="fas fa-check-circle text-emerald-500"></i> ມາຮຽນ (Present)</span>
+                                        {% elif dr.status == "A" %}
+                                            <span class="font-bold text-rose-700 flex items-center gap-1.5 text-sm"><i class="fas fa-times-circle text-rose-500"></i> ຂາດຮຽນ (Absent)</span>
+                                        {% elif dr.status == "L" %}
+                                            <span class="font-bold text-amber-700 flex items-center gap-1.5 text-sm"><i class="fas fa-clock text-amber-500"></i> ມາສາຍ (Late)</span>
+                                        {% else %}
+                                            <span class="font-bold text-slate-600 flex items-center gap-1.5 text-sm"><i class="fas fa-info-circle text-slate-400"></i> ຂໍລາ (Leave)</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-center shadow-inner">
+                                <span class="text-slate-400 text-sm font-medium">ຍັງບໍ່ມີບັນທຶກການມາຮຽນ</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-b border-dashed border-slate-200"></div>
+
+                    <!-- Tuition Fees Section -->
+                    <div class="relative">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center relative translate-y-[-1px]">
+                                <i class="fas fa-file-invoice-dollar text-sm"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800 tracking-wide">
+                                ສະຖານະຄ່າຮຽນ
+                            </h3>
+                        </div>
+
+                        {% if enrollment.tuition_fees.all %}
+                            <div class="space-y-3">
+                            {% for tfee in enrollment.tuition_fees.all|slice:":2" %}
+                                <div class="rounded-2xl border shadow-sm p-5 relative overflow-hidden transition-all hover:shadow-md {% if tfee.payment_date %}bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200{% else %}bg-gradient-to-r from-rose-50 to-red-50 border-rose-200{% endif %}">
+                                    
+                                    {% if tfee.payment_date %}
+                                    <div class="absolute right-[-10px] top-[-10px] text-emerald-500/10 text-8xl transform rotate-12"><i class="fas fa-check-circle"></i></div>
+                                    {% else %}
+                                    <div class="absolute right-[-10px] top-[-10px] text-rose-500/10 text-8xl transform -rotate-12"><i class="fas fa-exclamation-circle"></i></div>
+                                    {% endif %}
+                                    
+                                    <div class="relative z-10">
+                                        <p class="text-xs font-black uppercase tracking-widest {% if tfee.payment_date %}text-emerald-600{% else %}text-rose-600{% endif %} mb-1.5 flex items-center gap-2">
+                                            <span>ເດືອນ {{ tfee.month }}</span>
+                                            {% if tfee.payment_date %}
+                                            <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md text-[10px]">ຈ່າຍແລ້ວ</span>
+                                            {% else %}
+                                            <span class="bg-rose-500 shadow-sm text-white px-2 py-0.5 rounded-md text-[10px]">ຍັງບໍ່ຈ່າຍ</span>
+                                            {% endif %}
+                                        </p>
+                                        
+                                        <div class="flex justify-between items-end mb-3 mt-2">
+                                            <h4 class="text-2xl font-black text-slate-800 leading-none">
+                                                {{ tfee.amount|floatformat:"0g" }} <span class="text-sm font-bold text-slate-500 tracking-wide">LAK</span>
+                                            </h4>
+                                        </div>
+
+                                        <div class="pt-3 border-t {% if tfee.payment_date %}border-emerald-200/50{% else %}border-rose-200/50{% endif %} flex items-center text-sm font-medium text-slate-600">
+                                            {% if tfee.payment_date %}
+                                                <span class="flex items-center gap-2 whitespace-nowrap"><i class="far fa-calendar-check text-emerald-500"></i> ວັນທີ: <strong class="text-slate-800">{{ tfee.payment_date|date:"d/m/Y" }}</strong></span>
+                                            {% else %}
+                                                <span class="flex items-center gap-2 text-rose-600 whitespace-nowrap"><i class="far fa-calendar-times text-rose-500"></i> ກຳນົດ: <strong>{{ tfee.due_date|date:"d/m/Y"|default:"-" }}</strong></span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-center shadow-inner">
+                                <span class="text-slate-400 text-sm font-medium">ຍັງບໍ່ມີປະຫວັດການຈ່າຍຄ່າຮຽນ</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
         </div>
-    </div>
+    {% endif %}
 </div>
 {% endblock %}

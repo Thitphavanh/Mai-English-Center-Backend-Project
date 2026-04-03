@@ -48,6 +48,19 @@ def student_detail(request, student_id):
     
     return render(request, 'home/student_detail.html', {'student': student})
 
+def teacher_profile(request, teacher_id):
+    from django.shortcuts import get_object_or_404
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    teacher = get_object_or_404(User, id=teacher_id)
+    # Get all class schedules for this teacher
+    class_schedules = teacher.teaching_classes.all() if hasattr(teacher, 'teaching_classes') else []
+    
+    return render(request, 'home/teacher_profile.html', {
+        'teacher': teacher,
+        'class_schedules': class_schedules,
+    })
+
 def class_rosters(request):
     from academics.models import ClassSchedule
     schedules = list(ClassSchedule.objects.prefetch_related('course', 'enrollments__student').all())
@@ -242,25 +255,32 @@ def learning_assessment(request):
 
     if request.method == "POST":
         enrollment_id = request.POST.get("enrollment_id")
-        professor_id = request.POST.get("professor_id")
-        scores = request.POST.get("scores")
-        gpa = request.POST.get("gpa")
-        
+        professor_id  = request.POST.get("professor_id")
+
+        score_activity   = request.POST.get("score_activity")   or None
+        score_attendance = request.POST.get("score_attendance") or None
+        score_quiz       = request.POST.get("score_quiz")       or None
+        score_exercise   = request.POST.get("score_exercise")   or None
+        gpa              = request.POST.get("gpa")              or None
+
         listening = request.POST.get("listening_skill", "")
-        speaking = request.POST.get("speaking_skill", "")
-        reading = request.POST.get("reading_skill", "")
-        writing = request.POST.get("writing_skill", "")
+        speaking  = request.POST.get("speaking_skill", "")
+        reading   = request.POST.get("reading_skill", "")
+        writing   = request.POST.get("writing_skill", "")
 
         try:
             assessment = Assessment.objects.create(
-                enrollment_id=enrollment_id,
-                evaluator_id=professor_id,
-                total_score=scores if scores else 0,
-                gpa=gpa if gpa else None,
-                listening_remark=listening,
-                speaking_remark=speaking,
-                reading_remark=reading,
-                writing_remark=writing,
+                enrollment_id    = enrollment_id,
+                evaluator_id     = professor_id,
+                score_activity   = score_activity,
+                score_attendance = score_attendance,
+                score_quiz       = score_quiz,
+                score_exercise   = score_exercise,
+                gpa              = gpa,
+                listening_remark = listening,
+                speaking_remark  = speaking,
+                reading_remark   = reading,
+                writing_remark   = writing,
             )
 
             criteria_names = [
@@ -270,40 +290,59 @@ def learning_assessment(request):
                 "Activities Participation",
                 "Group Collaboration"
             ]
-
             for i, name in enumerate(criteria_names, start=1):
                 rating = request.POST.get(f"perf_{i}")
                 if rating:
-                    crit, created = AssessmentCriteria.objects.get_or_create(
-                        name_en=name,
-                        defaults={'order': i}
+                    crit, _ = AssessmentCriteria.objects.get_or_create(
+                        name_en=name, defaults={'order': i}
                     )
                     AssessmentDetail.objects.create(
-                        assessment=assessment,
-                        criteria=crit,
-                        rating=rating
+                        assessment=assessment, criteria=crit, rating=rating
                     )
-            
+
             success = True
         except Exception as e:
             error_msg = str(e)
 
+
     teachers = User.objects.filter(is_staff=True)
     classes = ClassSchedule.objects.select_related('course').all()
-    enrollments = Enrollment.objects.select_related('student', 'class_schedule').all()
-    
-    enrollments_data = [
+    # Prefetch monthly_scores to get the latest one for auto-pull
+    enrollments = Enrollment.objects.select_related('student', 'class_schedule').prefetch_related('monthly_scores').all()
+
+    classes_data = [
         {
+            'id': c.id,
+            'label': f"{c.course.name} — {c.time_slot}",
+            'teacher_id': c.teacher_id,
+        } for c in classes
+    ]
+
+    enrollments_data = []
+    for e in enrollments:
+        # Try to find the most recent monthly score
+        latest_score_obj = e.monthly_scores.order_by('-id').first() # ID order as a proxy for recency if month sorting is tricky
+        score_data = None
+        if latest_score_obj:
+            score_data = {
+                'activity': float(latest_score_obj.engagement) if latest_score_obj.engagement is not None else 0,
+                'attendance': float(latest_score_obj.attendance) if latest_score_obj.attendance is not None else 0,
+                'quiz': float(latest_score_obj.monthly_test) if latest_score_obj.monthly_test is not None else 0,
+                'exercise': float(latest_score_obj.exercise) if latest_score_obj.exercise is not None else 0,
+            }
+
+        enrollments_data.append({
             'id': e.id,
             'student_name': e.student.full_name or e.student.nick_name or str(e.student),
+            'student_nick': e.student.nick_name or '',
             'student_id_code': e.student.student_id or "",
-            'class_id': e.class_schedule_id
-        } for e in enrollments
-    ]
-    
+            'class_id': e.class_schedule_id,
+            'latest_score': score_data,
+        })
+
     context = {
         'teachers': teachers,
-        'classes': classes,
+        'classes_json': json.dumps(classes_data),
         'enrollments_json': json.dumps(enrollments_data),
         'success': success,
         'error_msg': error_msg,

@@ -1,0 +1,248 @@
+{% extends "backoffice/base.html" %}
+{% load backoffice_tags %}
+
+{% block title %}ລາຍງານຄະແນນ {{ month_str }} | MAI Center{% endblock %}
+{% block header_title %}📊 ລາຍງານ Letter Grade — {{ month_str }}{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+  <!-- ── FILTER BAR ── -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+    <form method="get" class="flex flex-wrap gap-4 items-end">
+      <div class="flex-1 min-w-[220px]">
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ຫ້ອງຮຽນ</label>
+        <select name="schedule" onchange="this.form.submit()"
+                class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+          <option value="">— ເລືອກຫ້ອງ —</option>
+          {% for sch in schedules %}
+          <option value="{{ sch.pk }}" {% if selected_schedule and selected_schedule.pk == sch.pk %}selected{% endif %}>
+            {{ sch.course.name }} — {{ sch.time_slot }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ເດືອນ</label>
+        <input type="month" name="month_input" id="id_month_input"
+               value="{% if month_str %}20{{ month_str|slice:'3:' }}-{{ month_str|slice:':2' }}{% endif %}"
+               class="border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+               onchange="syncMonth(this.value)">
+        <input type="hidden" name="month" id="id_month" value="{{ month_str }}">
+      </div>
+      <button type="submit"
+              class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-sm transition">
+        <i class="fas fa-search mr-2"></i>ເບິ່ງ
+      </button>
+      {% if selected_schedule and month_str %}
+      <a href="{% url 'backoffice:monthlyscore-entry' %}?schedule={{ selected_schedule.pk }}&month={{ month_str }}"
+         class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow-sm transition">
+        <i class="fas fa-pen mr-2"></i>ແກ້ໄຂ
+      </a>
+      {% endif %}
+      <a href="{% url 'backoffice:monthlyscore-calendar' %}{% if selected_schedule %}?schedule={{ selected_schedule.pk }}{% endif %}"
+         class="px-5 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 transition">
+        <i class="fas fa-calendar mr-2"></i>ປະຕິທິນ
+      </a>
+    </form>
+  </div>
+
+  {% if scores %}
+  <!-- ── SUMMARY CARDS ── -->
+  <div class="flex flex-wrap gap-4">
+    {% with total_count=scores|length %}
+    <!-- Total students -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center min-w-[110px]">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">ນັກຮຽນ</p>
+      <p class="text-3xl font-extrabold text-slate-800">{{ total_count }}</p>
+    </div>
+    <!-- Grade A -->
+    {% if grade_summary_dict.A %}
+    <div class="bg-white rounded-2xl border border-emerald-100 shadow-sm p-5 text-center min-w-[100px]">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Grade</p>
+      <p class="text-3xl font-extrabold text-emerald-600">{{ grade_summary_dict.A }}</p>
+      <p class="text-sm font-bold text-emerald-500">A</p>
+    </div>
+    {% endif %}
+    <!-- Grade B+ -->
+    {% with bplus=grade_summary_dict|get_item:"B+" %}
+    {% if bplus %}
+    <div class="bg-white rounded-2xl border border-blue-100 shadow-sm p-5 text-center min-w-[100px]">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Grade</p>
+      <p class="text-3xl font-extrabold text-blue-600">{{ bplus }}</p>
+      <p class="text-sm font-bold text-blue-500">B+</p>
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- Grade C+ -->
+    {% with cplus=grade_summary_dict|get_item:"C+" %}
+    {% if cplus %}
+    <div class="bg-white rounded-2xl border border-amber-100 shadow-sm p-5 text-center min-w-[100px]">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Grade</p>
+      <p class="text-3xl font-extrabold text-amber-600">{{ cplus }}</p>
+      <p class="text-sm font-bold text-amber-500">C+</p>
+    </div>
+    {% endif %}
+    {% endwith %}
+    <!-- Grade D -->
+    {% if grade_summary_dict.D %}
+    <div class="bg-white rounded-2xl border border-orange-100 shadow-sm p-5 text-center min-w-[100px]">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Grade</p>
+      <p class="text-3xl font-extrabold text-orange-600">{{ grade_summary_dict.D }}</p>
+      <p class="text-sm font-bold text-orange-500">D</p>
+    </div>
+    {% endif %}
+    <!-- Grade F -->
+    {% if grade_summary_dict.F %}
+    <div class="bg-white rounded-2xl border border-red-100 shadow-sm p-5 text-center min-w-[100px]">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Grade</p>
+      <p class="text-3xl font-extrabold text-red-500">{{ grade_summary_dict.F }}</p>
+      <p class="text-sm font-bold text-red-400">F</p>
+    </div>
+    {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- ── CHART + TABLE ROW ── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- Pie chart -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center justify-center">
+      <p class="text-sm font-bold text-slate-600 mb-4 text-center">ການກະຈາຍ Grade</p>
+      <canvas id="gradeChart" width="220" height="220"></canvas>
+      <div id="chartLegend" class="flex flex-wrap gap-2 justify-center mt-4 text-xs font-semibold"></div>
+    </div>
+
+    <!-- Score table -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-slate-800">
+          ຕາຕະລາງຄະແນນ
+          {% if selected_schedule %}<span class="text-slate-400 font-normal text-sm ml-2">| {{ selected_schedule.course.name }}</span>{% endif %}
+        </h3>
+        <span class="text-xs text-slate-400">ເດືອນ {{ month_str }}</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-left">
+              <th class="px-4 py-3 font-semibold text-slate-500 w-8">#</th>
+              <th class="px-4 py-3 font-semibold text-slate-700">ຊື່</th>
+              <th class="px-4 py-3 font-semibold text-slate-700">ຊື່ຫລ້ິນ</th>
+              <th class="px-4 py-3 text-center font-semibold text-indigo-600">QUIZ<br><span class="text-[10px] text-slate-400">/30</span></th>
+              <th class="px-4 py-3 text-center font-semibold text-emerald-600">ກິດຈະກຳ+ເຂົ້າ+Exercise<br><span class="text-[10px] text-slate-400">/70</span></th>
+              <th class="px-4 py-3 text-center font-semibold text-slate-700">ລວມ<br><span class="text-[10px] text-slate-400">/100</span></th>
+              <th class="px-4 py-3 text-center font-semibold text-slate-700">Grade</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for score in scores %}
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-4 py-3 text-slate-400 text-xs font-mono">{{ forloop.counter }}</td>
+              <td class="px-4 py-3 font-semibold text-slate-800">{{ score.enrollment.student.full_name }}</td>
+              <td class="px-4 py-3 text-slate-500 text-xs">{{ score.enrollment.student.nick_name }}</td>
+              <td class="px-4 py-3 text-center font-bold text-slate-700">{{ score.monthly_test|default:"—" }}</td>
+              <td class="px-4 py-3 text-center font-bold text-slate-700">{{ score.activities_total|default:"—" }}</td>
+              <td class="px-4 py-3 text-center">
+                <span class="text-base font-extrabold
+                  {% if score.total_score >= 88 %}text-emerald-600
+                  {% elif score.total_score >= 75 %}text-blue-600
+                  {% elif score.total_score >= 60 %}text-amber-600
+                  {% elif score.total_score >= 50 %}text-orange-600
+                  {% else %}text-red-500{% endif %}">
+                  {{ score.total_score|default:"—" }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold
+                  {% if score.letter_grade == 'A' %}bg-emerald-100 text-emerald-700
+                  {% elif score.letter_grade == 'B+' %}bg-blue-100 text-blue-700
+                  {% elif score.letter_grade == 'C+' %}bg-amber-100 text-amber-700
+                  {% elif score.letter_grade == 'D' %}bg-orange-100 text-orange-600
+                  {% else %}bg-red-100 text-red-600{% endif %}">
+                  {{ score.letter_grade|default:"—" }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% elif selected_schedule and month_str %}
+  <div class="bg-white rounded-2xl p-14 text-center shadow-sm border border-slate-100">
+    <div class="text-5xl mb-4">📭</div>
+    <p class="font-semibold text-slate-700 mb-1">ຍັງບໍ່ມີຄະແນນ ສຳລັບ {{ month_str }}</p>
+    <a href="{% url 'backoffice:monthlyscore-entry' %}?schedule={{ selected_schedule.pk }}&month={{ month_str }}"
+       class="inline-block mt-4 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition">
+      ➕ ປ້ອນຄະແນນດຽວນີ້
+    </a>
+  </div>
+  {% else %}
+  <div class="bg-white rounded-2xl p-14 text-center shadow-sm border border-slate-100">
+    <div class="text-5xl mb-4">📊</div>
+    <p class="text-slate-400 font-medium">ເລືອກຫ້ອງ ແລະ ເດືອນດ້ານເທິງ</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+function syncMonth(val) {
+  if (!val) return;
+  const [y, m] = val.split('-');
+  document.getElementById('id_month').value = m + '/' + y;
+}
+
+// ── Grade Pie Chart ────────────────────────────────────────────────
+const gradeSummary = {{ grade_summary|safe }};
+const ctx = document.getElementById('gradeChart');
+if (ctx && Object.keys(gradeSummary).length > 0) {
+  const gradeColors = {
+    'A':  { bg: '#d1fae5', border: '#059669' },
+    'B+': { bg: '#dbeafe', border: '#2563eb' },
+    'C+': { bg: '#fef3c7', border: '#d97706' },
+    'D':  { bg: '#ffedd5', border: '#ea580c' },
+    'F':  { bg: '#fee2e2', border: '#dc2626' },
+  };
+  const labels = Object.keys(gradeSummary);
+  const data   = Object.values(gradeSummary);
+  const bgs    = labels.map(g => (gradeColors[g] || {bg:'#e2e8f0'}).bg);
+  const borders= labels.map(g => (gradeColors[g] || {border:'#94a3b8'}).border);
+
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: bgs, borderColor: borders, borderWidth: 2 }]
+    },
+    options: {
+      cutout: '65%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} ຄົນ`
+          }
+        }
+      }
+    }
+  });
+
+  // Custom legend
+  const legend = document.getElementById('chartLegend');
+  labels.forEach((g, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'px-2.5 py-1 rounded-full text-xs font-bold';
+    chip.style.background = bgs[i];
+    chip.style.color = borders[i];
+    chip.textContent = `${g}: ${data[i]}`;
+    legend.appendChild(chip);
+  });
+}
+</script>
+{% endblock %}

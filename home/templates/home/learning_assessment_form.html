@@ -99,45 +99,144 @@
             <!-- Info Section -->
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm relative">
                 <div class="absolute -top-3 left-6 bg-slate-50 px-2 text-xs font-bold text-slate-400 uppercase tracking-wider">General Information</div>
-                
+
+                <!-- 1. Professor -->
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700">Professor <span class="text-slate-500 font-normal ml-1">ອາຈານ</span></label>
-                    <select name="professor_id" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none" required>
+                    <select id="professorSelect" name="professor_id"
+                            class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none" required>
                         <option value="">-- Select Professor --</option>
                         {% for teacher in teachers %}
                         <option value="{{ teacher.id }}">{{ teacher.first_name|default:teacher.username }} {{ teacher.last_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
+
+                <!-- 2. Class (filtered by Professor) -->
                 <div class="space-y-2">
                     <label class="block text-sm font-semibold text-slate-700">Class <span class="text-slate-500 font-normal ml-1">ຫ້ອງຮຽນ</span></label>
-                    <select id="classSelect" name="class_id" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none" required>
-                        <option value="">-- Select Class --</option>
-                        {% for cls in classes %}
-                        <option value="{{ cls.id }}">{{ cls.course.name }}</option>
-                        {% endfor %}
+                    <select id="classSelect" name="class_id"
+                            class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                            required disabled>
+                        <option value="">-- Select Professor First --</option>
                     </select>
+                    <p class="text-xs text-slate-400" id="classHint">ເລືອກອາຈານກ່ອນ</p>
                 </div>
+
+                <!-- 3. Student (filtered by Class) -->
                 <div class="space-y-2 md:col-span-2 lg:col-span-2">
                     <label class="block text-sm font-semibold text-slate-700">Student <span class="text-slate-500 font-normal ml-1">ນັກຮຽນ</span></label>
-                    <select id="studentSelect" name="enrollment_id" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400" required disabled>
+                    <select id="studentSelect" name="enrollment_id"
+                            class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none disabled:bg-slate-100 disabled:text-slate-400"
+                            required disabled>
                         <option value="">-- Select Class First --</option>
                     </select>
                 </div>
-                <!-- Scores handled by JS -->
-                <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700">Scores <span class="text-slate-500 font-normal ml-1">ຄະແນນ</span></label>
-                    <div class="relative">
-                        <input type="number" id="scores" name="scores" class="w-full px-4 py-2.5 bg-slate-100 border border-slate-300 text-brand-700 font-bold rounded-lg outline-none cursor-not-allowed" placeholder="0" readonly>
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 font-medium">/ 100</div>
+
+            </section>
+
+            <hr class="border-slate-200">
+
+            <!-- ── SCORE SECTION ──────────────────────────────────────── -->
+            <section class="space-y-4">
+                <div class="flex items-center gap-4">
+                    <div class="bg-brand-100 text-brand-700 font-bold w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border border-brand-200">📊</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Score Breakdown <span class="text-brand-600">/ 100</span></h3>
+                        <p class="text-slate-500 text-sm">ໃສ່ຄະແນນແຕ່ລະໝວດ — ຈະຄິດໄລ່ ແລະ ຕັດສິນ Grade ອັດຕະໂນມັດ</p>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1">Calculated automatically</p>
                 </div>
-                <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700">GPA</label>
-                    <input type="number" step="0.01" max="4.0" id="gpa" name="gpa" class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all outline-none font-medium" placeholder="e.g. 4.0">
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+                    <!-- Activity /30 -->
+                    <div class="space-y-1">
+                        <label class="flex items-center gap-2 text-sm font-bold text-pink-700">
+                            <span class="w-3 h-3 bg-pink-500 rounded-full inline-block"></span>
+                            ACTIVITY <span class="font-normal text-slate-500 ml-1">ກິດຈະກຳ</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="score_activity" name="score_activity"
+                                   min="0" max="30" step="0.5" placeholder="0"
+                                   class="score-comp w-full px-4 py-3 border-2 border-pink-200 rounded-xl text-lg font-extrabold text-pink-700 focus:outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-200 transition bg-white"
+                                   data-max="30">
+                            <div class="absolute inset-y-0 right-3 flex items-center text-sm font-bold text-pink-300 pointer-events-none">/30</div>
+                        </div>
+                        <p class="text-xs text-slate-400">30%</p>
+                    </div>
+
+                    <!-- Attendance /20 -->
+                    <div class="space-y-1">
+                        <label class="flex items-center gap-2 text-sm font-bold text-amber-700">
+                            <span class="w-3 h-3 bg-amber-500 rounded-full inline-block"></span>
+                            ATTENDANCE <span class="font-normal text-slate-500 ml-1">ເຂົ້າຮຽນ</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="score_attendance" name="score_attendance"
+                                   min="0" max="20" step="0.5" placeholder="0"
+                                   class="score-comp w-full px-4 py-3 border-2 border-amber-200 rounded-xl text-lg font-extrabold text-amber-700 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 transition bg-white"
+                                   data-max="20">
+                            <div class="absolute inset-y-0 right-3 flex items-center text-sm font-bold text-amber-300 pointer-events-none">/20</div>
+                        </div>
+                        <p class="text-xs text-slate-400">20%</p>
+                    </div>
+
+                    <!-- Quiz /30 -->
+                    <div class="space-y-1">
+                        <label class="flex items-center gap-2 text-sm font-bold text-indigo-700">
+                            <span class="w-3 h-3 bg-indigo-500 rounded-full inline-block"></span>
+                            QUIZ <span class="font-normal text-slate-500 ml-1">Monthly Test</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="score_quiz" name="score_quiz"
+                                   min="0" max="30" step="0.5" placeholder="0"
+                                   class="score-comp w-full px-4 py-3 border-2 border-indigo-200 rounded-xl text-lg font-extrabold text-indigo-700 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition bg-white"
+                                   data-max="30">
+                            <div class="absolute inset-y-0 right-3 flex items-center text-sm font-bold text-indigo-300 pointer-events-none">/30</div>
+                        </div>
+                        <p class="text-xs text-slate-400">30%</p>
+                    </div>
+
+                    <!-- Exercise /20 -->
+                    <div class="space-y-1">
+                        <label class="flex items-center gap-2 text-sm font-bold text-emerald-700">
+                            <span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span>
+                            EXERCISE <span class="font-normal text-slate-500 ml-1">Assignment</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" id="score_exercise" name="score_exercise"
+                                   min="0" max="20" step="0.5" placeholder="0"
+                                   class="score-comp w-full px-4 py-3 border-2 border-emerald-200 rounded-xl text-lg font-extrabold text-emerald-700 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition bg-white"
+                                   data-max="20">
+                            <div class="absolute inset-y-0 right-3 flex items-center text-sm font-bold text-emerald-300 pointer-events-none">/20</div>
+                        </div>
+                        <p class="text-xs text-slate-400">20%</p>
+                    </div>
+                </div>
+
+                <!-- Live Total + Grade + GPA -->
+                <div class="flex flex-wrap items-center gap-4 mt-2 px-1">
+                    <!-- Total -->
+                    <div class="flex items-center gap-3 bg-white border-2 border-slate-200 rounded-2xl px-6 py-3 shadow-sm">
+                        <span class="text-slate-500 font-semibold text-sm">ຄະແນນລວມ TOTAL</span>
+                        <span id="liveTotal" class="text-3xl font-black text-slate-800 tabular-nums">—</span>
+                        <span class="text-slate-400 font-bold">/100</span>
+                    </div>
+                    <!-- Grade badge -->
+                    <div id="gradeDisplay" class="hidden px-8 py-3 rounded-2xl text-2xl font-black border-2 shadow-sm transition-all duration-300">
+                        Grade: <span id="gradeText">—</span>
+                    </div>
+                    <!-- GPA badge -->
+                    <div id="gpaDisplay" class="hidden items-center gap-2 bg-white border-2 border-purple-200 rounded-2xl px-6 py-3 shadow-sm">
+                        <span class="text-purple-500 font-semibold text-sm">GPA</span>
+                        <span id="gpaText" class="text-3xl font-black text-purple-700 tabular-nums">—</span>
+                        <span class="text-purple-300 font-bold">/4.0</span>
+                    </div>
+                    <!-- Hidden inputs to submit computed values -->
+                    <input type="hidden" name="gpa" id="gpaHidden">
                 </div>
             </section>
+
 
             <hr class="border-slate-200">
 
@@ -347,109 +446,198 @@
 
     <!-- JavaScript Interactive Logic -->
     <script>
-        // Enrollment Data injected from Django View
+        // Data injected from Django
+        const classesData     = {{ classes_json|safe }};
         const enrollmentsData = {{ enrollments_json|safe }};
-        
+
         document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('assessmentForm');
-            const scoreInput = document.getElementById('scores');
-            const radioButtons = document.querySelectorAll('input[type="radio"]');
-            
-            const classSelect = document.getElementById('classSelect');
-            const studentSelect = document.getElementById('studentSelect');
+            const form           = document.getElementById('assessmentForm');
+            const scoreInput     = document.getElementById('scores');
+            const radioButtons   = document.querySelectorAll('input[type="radio"]');
+            const professorSelect = document.getElementById('professorSelect');
+            const classSelect    = document.getElementById('classSelect');
+            const studentSelect  = document.getElementById('studentSelect');
+            const classHint      = document.getElementById('classHint');
 
-            // Handle Class Select Change
-            classSelect.addEventListener('change', function() {
-                const classId = this.value;
-                
-                // Clear existing options
+            // ── 1. Professor → Class cascade ──────────────────────────────
+            professorSelect.addEventListener('change', function () {
+                const teacherId = parseInt(this.value, 10);
+
+                // Reset downstream
+                classSelect.innerHTML  = '<option value="">-- Select Class --</option>';
+                studentSelect.innerHTML = '<option value="">-- Select Class First --</option>';
+                studentSelect.disabled = true;
+
+                if (!teacherId) {
+                    classSelect.disabled = true;
+                    classHint.textContent = 'ເລືອກອາຈານກ່ອນ';
+                    return;
+                }
+
+                const teacherClasses = classesData.filter(c => c.teacher_id === teacherId);
+
+                if (teacherClasses.length === 0) {
+                    classSelect.innerHTML = '<option value="">— ອາຈານນີ້ຍັງບໍ່ມີຫ້ອງ —</option>';
+                    classSelect.disabled = true;
+                    classHint.textContent = 'ບໍ່ມີຫ້ອງທີ່ຜູກກັບອາຈານນີ້';
+                } else {
+                    teacherClasses.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.label;
+                        classSelect.appendChild(opt);
+                    });
+                    classSelect.disabled = false;
+                    classHint.textContent = `ຫ້ອງ ${teacherClasses.length} ຫ້ອງ`;
+                }
+            });
+
+            // ── 2. Class → Student cascade ────────────────────────────────
+            classSelect.addEventListener('change', function () {
+                const classId = parseInt(this.value, 10);
+
                 studentSelect.innerHTML = '<option value="">-- Select Student --</option>';
-                
-                if (classId) {
-                    studentSelect.disabled = false;
-                    const filteredStudents = enrollmentsData.filter(e => e.class_id == classId);
-                    
-                    if (filteredStudents.length === 0) {
-                        studentSelect.innerHTML = '<option value="">-- No students in this class --</option>';
-                        studentSelect.disabled = true;
-                    } else {
-                        filteredStudents.forEach(e => {
-                            const opt = document.createElement('option');
-                            opt.value = e.id;
-                            opt.textContent = `${e.student_name} ${e.student_id_code ? `(${e.student_id_code})` : ''}`;
-                            studentSelect.appendChild(opt);
-                        });
-                    }
-                } else {
+
+                if (!classId) {
                     studentSelect.disabled = true;
-                    studentSelect.innerHTML = '<option value="">-- Select Class First --</option>';
-                }
-            });
-
-            // Calculate score out of 100 based on the 5 performance metrics (max 25 points total)
-            const calculateScore = () => {
-                let totalPoints = 0;
-                let groupedInputs = {};
-
-                // Group checked radios by name to ensure we count correctly
-                radioButtons.forEach(radio => {
-                    if (radio.checked) {
-                        groupedInputs[radio.name] = parseInt(radio.value, 10);
-                    }
-                });
-
-                // Sum up points
-                for (let name in groupedInputs) {
-                    totalPoints += groupedInputs[name];
+                    return;
                 }
 
-                // If at least one is checked, calculate proportional out of 100
-                // 25 is max (5 questions * 5 points)
-                if (Object.keys(groupedInputs).length > 0) {
-                    const percentage = Math.round((totalPoints / 25) * 100);
-                    scoreInput.value = percentage;
-                    
-                    // Add a brief animation to the score input to show it updated
-                    scoreInput.classList.add('bg-brand-100', 'text-brand-800');
-                    setTimeout(() => {
-                        scoreInput.classList.remove('bg-brand-100', 'text-brand-800');
-                    }, 300);
+                const filtered = enrollmentsData.filter(e => e.class_id === classId);
+
+                if (filtered.length === 0) {
+                    studentSelect.innerHTML = '<option value="">— ຫ້ອງນີ້ຍັງບໍ່ມີນັກຮຽນ —</option>';
+                    studentSelect.disabled = true;
                 } else {
-                    scoreInput.value = '';
+                    filtered.forEach(e => {
+                        const opt = document.createElement('option');
+                        opt.value = e.id;
+                        const nick = e.student_nick ? ` (${e.student_nick})` : '';
+                        const sid  = e.student_id_code ? ` [${e.student_id_code}]` : '';
+                        opt.textContent = `${e.student_name}${nick}${sid}`;
+                        studentSelect.appendChild(opt);
+                    });
+                    studentSelect.disabled = false;
                 }
-            };
-
-            // Attach event listener to all radios
-            radioButtons.forEach(radio => {
-                radio.addEventListener('change', calculateScore);
             });
 
-            // Form submission visual feedback validation
-            form.addEventListener('submit', (e) => {
-                // Check if all 5 radios are selected
-                const groups = ['perf_1', 'perf_2', 'perf_3', 'perf_4', 'perf_5'];
-                let isValid = true;
+            // ── 2.5 Auto-pull scores when student is selected ──────────────
+            studentSelect.addEventListener('change', function() {
+                const enrollmentId = parseInt(this.value, 10);
+                const scoreActivity = document.getElementById('score_activity');
+                const scoreAttendance = document.getElementById('score_attendance');
+                const scoreQuiz = document.getElementById('score_quiz');
+                const scoreExercise = document.getElementById('score_exercise');
 
-                groups.forEach(group => {
-                    const checked = document.querySelector(`input[name="${group}"]:checked`);
-                    if (!checked) {
-                        isValid = false;
-                        // Provide visual cue for missing rows
-                        const firstRadioInGroup = document.querySelector(`input[name="${group}"]`);
-                        if (firstRadioInGroup) {
-                            const row = firstRadioInGroup.closest('tr');
-                            row.classList.add('bg-red-50');
-                            setTimeout(() => row.classList.remove('bg-red-50'), 2000);
-                        }
+                // Find the record
+                const entry = enrollmentsData.find(e => e.id === enrollmentId);
+                
+                if (entry && entry.latest_score) {
+                    // Auto-fill
+                    scoreActivity.value = entry.latest_score.activity;
+                    scoreAttendance.value = entry.latest_score.attendance;
+                    scoreQuiz.value = entry.latest_score.quiz;
+                    scoreExercise.value = entry.latest_score.exercise;
+                    
+                    // Show a subtle animation/highlight to show it was auto-filled
+                    const inputs = [scoreActivity, scoreAttendance, scoreQuiz, scoreExercise];
+                    inputs.forEach(inp => {
+                        inp.classList.add('bg-brand-50');
+                        setTimeout(() => inp.classList.remove('bg-brand-50'), 1500);
+                    });
+                    
+                    recalcScores();
+                } else {
+                    // Reset if no score found or student unselected
+                    const inputs = [scoreActivity, scoreAttendance, scoreQuiz, scoreExercise];
+                    inputs.forEach(inp => inp.value = '');
+                    recalcScores();
+                }
+            });
+
+
+            // ── 3. Live score + grade + GPA from 4 components ────────────
+            const liveTotal    = document.getElementById('liveTotal');
+            const gradeDisplay = document.getElementById('gradeDisplay');
+            const gradeText    = document.getElementById('gradeText');
+            const gpaDisplay   = document.getElementById('gpaDisplay');
+            const gpaText      = document.getElementById('gpaText');
+            const gpaHidden    = document.getElementById('gpaHidden');
+
+            const gradeStyles = {
+                'A':  { cls: 'bg-emerald-50 text-emerald-700 border-emerald-300' },
+                'B+': { cls: 'bg-blue-50 text-blue-700 border-blue-300' },
+                'C+': { cls: 'bg-amber-50 text-amber-700 border-amber-300' },
+                'D':  { cls: 'bg-orange-50 text-orange-700 border-orange-300' },
+                'F':  { cls: 'bg-red-50 text-red-600 border-red-300' },
+            };
+            const gradeGPA = { 'A': 4.0, 'B+': 3.5, 'C+': 2.5, 'D': 1.5, 'F': 0.0 };
+
+            function computeGradeLetter(total) {
+                if (total >= 88) return 'A';
+                if (total >= 75) return 'B+';
+                if (total >= 60) return 'C+';
+                if (total >= 50) return 'D';
+                return 'F';
+            }
+
+            function recalcScores() {
+                const inputs = document.querySelectorAll('.score-comp');
+                let total = 0, hasValue = false;
+                inputs.forEach(inp => {
+                    const v   = parseFloat(inp.value);
+                    const max = parseFloat(inp.dataset.max);
+                    if (!isNaN(v)) {
+                        hasValue = true;
+                        total += Math.min(v, max);
+                        inp.classList.toggle('border-red-400', v > max);
                     }
                 });
 
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please complete all Performance Descriptions before submitting.');
+                if (hasValue) {
+                    const rounded = Math.round(total * 10) / 10;
+                    liveTotal.textContent = rounded;
+
+                    const grade = computeGradeLetter(rounded);
+                    gradeText.textContent = grade;
+                    const style = gradeStyles[grade];
+                    gradeDisplay.className = `px-8 py-3 rounded-2xl text-2xl font-black border-2 shadow-sm transition-all duration-300 ${style.cls}`;
+                    gradeDisplay.classList.remove('hidden');
+
+                    const gpa = gradeGPA[grade];
+                    gpaText.textContent = gpa.toFixed(1);
+                    gpaHidden.value = gpa.toFixed(2);
+                    gpaDisplay.classList.remove('hidden');
+                    gpaDisplay.classList.add('flex');
+                } else {
+                    liveTotal.textContent = '—';
+                    gradeDisplay.classList.add('hidden');
+                    gpaDisplay.classList.add('hidden');
+                    gpaDisplay.classList.remove('flex');
+                    gpaHidden.value = '';
                 }
+            }
+
+            document.querySelectorAll('.score-comp').forEach(inp =>
+                inp.addEventListener('input', recalcScores)
+            );
+
+            // ── 4. Form validation ────────────────────────────────────────
+            form.addEventListener('submit', e => {
+                const groups = ['perf_1', 'perf_2', 'perf_3', 'perf_4', 'perf_5'];
+                let valid = true;
+                groups.forEach(g => {
+                    if (!document.querySelector(`input[name="${g}"]:checked`)) {
+                        valid = false;
+                        const row = document.querySelector(`input[name="${g}"]`)?.closest('tr');
+                        if (row) { row.classList.add('bg-red-50'); setTimeout(() => row.classList.remove('bg-red-50'), 2000); }
+                    }
+                });
+                if (!valid) { e.preventDefault(); alert('Please complete all Performance Descriptions before submitting.'); }
             });
         });
+
     </script>
+
 </body>
 </html>

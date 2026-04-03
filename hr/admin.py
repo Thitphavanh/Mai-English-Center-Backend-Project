@@ -14,7 +14,19 @@ class EmployeeProfileForm(forms.ModelForm):
 
     class Meta:
         model = EmployeeProfile
-        fields = ('first_name', 'last_name', 'phone_number', 'role')
+        fields = (
+            'first_name', 'last_name',
+            'full_name_en',
+            'nickname_en', 'nickname_lo',
+            'age',
+            'profile_image', 'phone_number', 'role',
+            'education_background', 'previous_workplace', 'work_experience',
+        )
+        widgets = {
+            'education_background': forms.Textarea(attrs={'rows': 3}),
+            'previous_workplace': forms.Textarea(attrs={'rows': 3}),
+            'work_experience': forms.Textarea(attrs={'rows': 3}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
