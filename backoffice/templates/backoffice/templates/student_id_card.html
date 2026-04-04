@@ -1,0 +1,109 @@
+{% extends "backoffice/base.html" %}
+{% block title %}Student Card: {{ student.full_name }} | MAI English Center{% endblock %}
+{% block header_title %}Student ID Card Preview{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center py-20 space-y-12">
+    
+    <!-- ID Card Container -->
+    <div id="id-card" class="relative w-[400px] h-[250px] bg-slate-900 rounded-[24px] overflow-hidden shadow-2xl shadow-slate-400 group ring-4 ring-white">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10 pointer-events-none">
+            <div class="absolute -top-20 -left-20 w-64 h-64 bg-blue-500 rounded-full blur-[80px]"></div>
+            <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-purple-500 rounded-full blur-[80px]"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-10">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-lg border border-white/20">
+                    <i class="fas fa-graduation-cap text-xl text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-sm tracking-widest uppercase">MAI Center</h3>
+                    <p class="text-blue-400 font-bold text-[8px] uppercase tracking-[0.2em]">English Academy</p>
+                </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                <span class="text-[8px] font-black text-white uppercase tracking-widest">Student Pass</span>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="absolute inset-0 flex items-center p-8 pt-16 gap-8">
+            <!-- Photo Slot -->
+            <div class="relative flex-shrink-0">
+                <div class="w-28 h-32 bg-slate-800 rounded-2xl overflow-hidden border-2 border-white/20 shadow-xl">
+                    {% if student.profile_image %}
+                        <img src="{{ student.profile_image.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-slate-700">
+                            <i class="fas fa-user text-4xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Mini Badge -->
+                <div class="absolute -bottom-2 -right-2 bg-blue-500 w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center text-white text-xs shadow-lg">
+                    <i class="fas fa-check"></i>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="flex-1 space-y-4">
+                <div class="space-y-1">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Name & Surname</p>
+                    <h2 class="text-white font-black text-xl leading-tight">{{ student.full_name }}</h2>
+                    <p class="text-blue-400 font-bold text-sm">{{ student.full_name_lo }}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-0.5">
+                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Student ID</p>
+                        <p class="text-white font-bold text-xs tracking-widest">#{{ student.student_id }}</p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Nick Name</p>
+                        <p class="text-white font-bold text-xs">{{ student.nick_name }} ({{ student.nick_name_lo|default:"-" }})</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Contact Bar -->
+        <div class="absolute bottom-0 left-0 right-0 bg-blue-600/90 backdrop-blur-md px-6 py-2 flex justify-between items-center">
+            <p class="text-[8px] font-black text-white uppercase tracking-widest">www.mai-center.com</p>
+            <div class="flex gap-3 text-white/50 text-[10px]">
+                <i class="fab fa-facebook-f"></i>
+                <i class="fab fa-whatsapp"></i>
+                <i class="fas fa-phone-alt"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex gap-4 print:hidden">
+        <button onclick="window.print()" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold flex items-center gap-3 hover:bg-slate-800 transition transform hover:-translate-y-1 shadow-lg">
+            <i class="fas fa-print"></i>
+            Print Card
+        </button>
+        <a href="{% url 'backoffice:student-list' %}" class="px-8 py-4 bg-white text-slate-600 rounded-2xl font-bold flex items-center gap-3 border border-slate-200 hover:bg-slate-50 transition transform hover:-translate-y-1 shadow-sm">
+            <i class="fas fa-arrow-left"></i>
+            Back to List
+        </a>
+    </div>
+
+</div>
+
+<style>
+    @media print {
+        @page {
+            size: auto;
+            margin: 0;
+        }
+        body { background: white !important; }
+        aside, header, footer, .print\:hidden { display: none !important; }
+        main { padding: 0 !important; margin: 0 !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        #id-card { box-shadow: none !important; border: 1px solid #1e293b !important; -webkit-print-color-adjust: exact; }
+    }
+</style>
+{% endblock %}

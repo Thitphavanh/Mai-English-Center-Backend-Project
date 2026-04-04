@@ -59,6 +59,18 @@
                     {% endfor %}
                     
                     <td class="py-4 px-6 text-sm text-right space-x-2 whitespace-nowrap">
+                        {% if model_name == 'TuitionFee' %}
+                        <a href="{% url 'backoffice:tuition-invoice' row.pk %}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition" title="Print Invoice">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if model_name == 'Student' %}
+                        <a href="{% url 'backoffice:student-id-card' row.pk %}" target="_blank" class="inline-flex items-center justify-center w-8 h-8 rounded bg-purple-50 text-purple-600 hover:bg-purple-100 transition" title="Student ID Card">
+                            <i class="fas fa-id-card"></i>
+                        </a>
+                        {% endif %}
+
                         {% url edit_url_name row.pk as edit_url %}
                         <a href="{{ edit_url }}" class="inline-flex items-center justify-center w-8 h-8 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 transition" title="Edit">
                             <i class="fas fa-edit"></i>

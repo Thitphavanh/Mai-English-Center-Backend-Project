@@ -1,0 +1,161 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+{% block title %}Invoice #{{ invoice.id }} | MAI English Center{% endblock %}
+{% block header_title %}Student Tuition Invoice{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto my-8 bg-white shadow-lg border border-gray-100 rounded-2xl overflow-hidden print:shadow-none print:border-0 border-t-8 border-t-slate-900">
+    <!-- Header -->
+    <div class="p-8 md:p-12 flex flex-col md:flex-row justify-between items-start gap-8 bg-slate-50 border-b border-slate-100">
+        <div class="flex items-center gap-6">
+            <div class="bg-blue-600 w-20 h-20 rounded-3xl flex items-center justify-center shadow-xl transform -rotate-12 border-4 border-white">
+                <i class="fas fa-graduation-cap text-4xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">MAI English <br><span class="text-blue-600 tracking-widest">Center</span></h1>
+                <p class="text-slate-400 font-bold tracking-[0.2em] text-[10px] uppercase mt-2">Professional Language Academy</p>
+            </div>
+        </div>
+        <div class="text-right flex flex-col items-end">
+            <div class="px-4 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest mb-4">Official Receipt</div>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Invoice #{{ invoice.id|stringformat:"05d" }}</h2>
+            <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Payment Date: {{ invoice.payment_date|date:"d M Y"|default:"Pending" }}</p>
+        </div>
+    </div>
+
+    <!-- Main Section -->
+    <div class="p-8 md:p-12 space-y-12">
+        <!-- Client & Center Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div class="space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs"><i class="fas fa-user"></i></span>
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Student Information</h4>
+                </div>
+                <div>
+                    <p class="text-2xl font-black text-slate-900 mb-1">{{ invoice.enrollment.student.full_name }}</p>
+                    <p class="text-lg font-bold text-blue-600/70">{{ invoice.enrollment.student.full_name_lo }}</p>
+                    <div class="flex items-center gap-4 mt-4 text-xs font-bold">
+                        <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-full">ID: {{ invoice.enrollment.student.student_id }}</span>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-full">Phone: {{ invoice.enrollment.student.phone_number }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xs"><i class="fas fa-school"></i></span>
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Course & Schedule</h4>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                        <p class="text-sm font-black text-slate-800 uppercase tracking-tight">{{ invoice.enrollment.class_schedule.course.name }}</p>
+                    </div>
+                    <p class="text-slate-500 font-bold text-sm">{{ invoice.enrollment.class_schedule.time_slot }}</p>
+                    <p class="text-[10px] text-slate-400 mt-2 font-black uppercase tracking-widest">Professor: <span class="text-slate-600">{{ invoice.enrollment.class_schedule.teacher.get_full_name|default:invoice.enrollment.class_schedule.teacher.username }}</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="border border-slate-200 rounded-3xl overflow-hidden shadow-2xl shadow-slate-100">
+            <table class="w-full text-left">
+                <thead class="bg-white border-b border-slate-100 uppercase text-[10px] font-black text-slate-400 tracking-wider">
+                    <tr>
+                        <th class="px-8 py-5">Item Details (ລາຍລະອຽດ)</th>
+                        <th class="px-8 py-5">Month (ເດືອນ)</th>
+                        <th class="px-8 py-5 text-right">Subtotal (ລາຄາ)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 text-slate-800">
+                    <tr>
+                        <td class="px-8 py-8">
+                            <p class="font-black text-lg text-slate-900">Monthly Tuition Fee</p>
+                            <p class="text-xs text-slate-400 font-medium mt-1 leading-relaxed">Language skill training and academic support for the specified period.</p>
+                        </td>
+                        <td class="px-8 py-8">
+                            <span class="bg-blue-50 text-blue-700 px-4 py-2 rounded-xl text-xs font-black tracking-widest">{{ invoice.month }}</span>
+                        </td>
+                        <td class="px-8 py-8 text-right font-black text-xl tabular-nums">
+                            {{ invoice.amount|intcomma }}
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="bg-slate-50">
+                    <tr class="border-t-2 border-slate-900/10">
+                        <td colspan="2" class="px-8 py-8 text-right uppercase text-xs font-black tracking-widest text-slate-400">Total Due (ລວມທັງໝົດ)</td>
+                        <td class="px-8 py-8 text-right">
+                            <p class="text-4xl font-black text-slate-900 tabular-nums">{{ invoice.amount|intcomma }}</p>
+                            <p class="text-[10px] font-black text-blue-600 tracking-widest uppercase mt-1">Lao Kip Only</p>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Signature & Footer Notes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16 pt-8 items-end">
+            <div class="p-8 bg-blue-50/50 rounded-3xl border border-blue-100/50">
+                <h5 class="text-[10px] font-black text-blue-700 uppercase tracking-[0.2em] mb-3">Notice:</h5>
+                <p class="text-xs text-blue-800/60 leading-relaxed italic font-medium">
+                    This official document serves as a receipt for the specific tuition fees mentioned above. Payments are final and non-refundable. ບິນນີ້ໃຊ້ເປັນສິ່ງຢືນຢັນການຊຳລະເງິນຢ່າງເປັນທາງການ.
+                </p>
+            </div>
+            
+            <div class="text-center space-y-4">
+                <div class="h-20 flex items-center justify-center opacity-5">
+                    <i class="fas fa-stamp text-7xl transform -rotate-12"></i>
+                </div>
+                <div class="space-y-1">
+                    <div class="border-b-2 border-slate-900 w-48 mx-auto pb-1"></div>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-900">Authorized Signature</p>
+                    <p class="text-[9px] text-slate-400 font-bold">MAI English Center Official Stamp</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="bg-slate-900 p-10 flex flex-wrap justify-between items-center gap-8">
+        <div class="flex flex-wrap gap-10">
+            <div class="space-y-1">
+                <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Office Phone</p>
+                <p class="text-white text-xs font-bold">+856 20 9676 9512</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Email Support</p>
+                <p class="text-white text-xs font-bold">contact@mai-center.com</p>
+            </div>
+            <div class="space-y-1">
+                <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Location</p>
+                <p class="text-white text-xs font-bold">Vientiane, Lao PDR</p>
+            </div>
+        </div>
+        <div class="hidden md:block">
+            <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">www.mai-center.com</p>
+        </div>
+    </div>
+</div>
+
+<!-- Print & Action Buttons -->
+<div class="max-w-4xl mx-auto flex justify-center gap-4 mb-20 animate-fade-in print:hidden">
+    <button onclick="window.print()" class="group px-10 py-5 bg-blue-600 text-white rounded-3xl font-black uppercase text-xs tracking-widest flex items-center gap-4 hover:bg-blue-700 transition-all transform hover:-translate-y-1 shadow-2xl shadow-blue-500/30">
+        <i class="fas fa-print group-hover:scale-125 transition"></i>
+        Download / Print Receipt
+    </button>
+    <a href="{% url 'backoffice:tuitionfee-list' %}" class="px-10 py-5 bg-white text-slate-600 rounded-3xl font-black uppercase text-xs tracking-widest flex items-center gap-4 border border-slate-200 hover:bg-slate-50 transition transform hover:-translate-y-1">
+        <i class="fas fa-arrow-left"></i>
+        Go Back
+    </a>
+</div>
+
+<style>
+    @media print {
+        body { background-color: white !important; }
+        aside, header, footer { display: none !important; }
+        main { padding: 0 !important; margin: 0 !important; }
+        .flex-1 { overflow: visible !important; }
+        .bg-slate-50 { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
+    }
+</style>
+{% endblock %}

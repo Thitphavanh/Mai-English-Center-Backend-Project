@@ -49,3 +49,14 @@ urlpatterns += [
     path('monthly-scores/entry/', MonthlyScoreBulkEntryView.as_view(), name='monthlyscore-entry'),
     path('monthly-scores/detail/', MonthlyScoreDetailView.as_view(), name='monthlyscore-detail'),
 ]
+
+# TEMPLATES & DOCUMENTS (ບິນ ແລະ ບັດ)
+urlpatterns += [
+    path('tuition-invoice/<int:pk>/', views.TuitionInvoiceView.as_view(), name='tuition-invoice'),
+    path('student-id-card/<int:pk>/', views.StudentIDCardView.as_view(), name='student-id-card'),
+]
+
+# ATTENDANCE (Teacher & Student)
+urlpatterns += [
+    path('attendance/', views.AttendancePortalView.as_view(), name='attendance-portal'),
+]

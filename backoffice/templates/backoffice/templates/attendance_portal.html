@@ -1,0 +1,173 @@
+{% extends "backoffice/base.html" %}
+{% block title %}Attendance Monitoring | MAI English Center{% endblock %}
+{% block header_title %}Attendance & Communication Portal{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    
+    <!-- Sidebar: Controls & Quick Links -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Date Selector -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Select Date</h4>
+            <form method="GET" class="space-y-4">
+                <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" 
+                       onchange="this.form.submit()"
+                       class="w-full px-4 py-3 bg-slate-50 border-0 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-slate-700">
+                <p class="text-[10px] text-slate-400 font-medium italic">Viewing records for: <span class="text-blue-600 font-bold">{{ selected_date|date:"D, d M Y" }}</span></p>
+            </form>
+        </div>
+
+        <!-- Meeting & Social Links (ຄຳຮ້ອງຂໍຈາກ USER) -->
+        <div class="bg-slate-900 p-6 rounded-3xl shadow-xl border border-slate-800 space-y-6">
+            <h4 class="text-xs font-black text-blue-400 uppercase tracking-widest border-b border-white/10 pb-3">Meeting & Support</h4>
+            <div class="grid grid-cols-1 gap-3">
+                <a href="https://wa.me/8562096769512" target="_blank" class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl hover:bg-emerald-500/20 hover:border-emerald-500/50 border border-transparent transition group">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition"><i class="fab fa-whatsapp text-lg"></i></div>
+                    <div>
+                        <p class="text-white text-xs font-bold">WhatsApp</p>
+                        <p class="text-white/40 text-[9px] uppercase tracking-tighter">Direct Chat</p>
+                    </div>
+                </a>
+                <a href="https://m.me/yourpage" target="_blank" class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl hover:bg-blue-500/20 hover:border-blue-500/50 border border-transparent transition group">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center group-hover:scale-110 transition"><i class="fab fa-facebook-messenger text-lg"></i></div>
+                    <div>
+                        <p class="text-white text-xs font-bold">Messenger</p>
+                        <p class="text-white/40 text-[9px] uppercase tracking-tighter">Support Page</p>
+                    </div>
+                </a>
+                <a href="https://line.me/R/ti/p/yourline" target="_blank" class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl hover:bg-green-500/20 hover:border-green-500/50 border border-transparent transition group">
+                    <div class="w-10 h-10 rounded-xl bg-green-500/20 text-green-500 flex items-center justify-center group-hover:scale-110 transition"><i class="fab fa-line text-lg"></i></div>
+                    <div>
+                        <p class="text-white text-xs font-bold">Line ID</p>
+                        <p class="text-white/40 text-[9px] uppercase tracking-tighter">ID: mai_center</p>
+                    </div>
+                </a>
+                <a href="https://zoom.us/j/yourmeeting" target="_blank" class="flex items-center gap-3 p-3 bg-white/5 rounded-2xl hover:bg-blue-400/20 hover:border-blue-400/50 border border-transparent transition group">
+                    <div class="w-10 h-10 rounded-xl bg-blue-400/20 text-blue-400 flex items-center justify-center group-hover:scale-110 transition"><i class="fas fa-video text-lg"></i></div>
+                    <div>
+                        <p class="text-white text-xs font-bold">Zoom Meeting</p>
+                        <p class="text-white/40 text-[9px] uppercase tracking-tighter">Video Session</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content: Attendance Sheets -->
+    <div class="lg:col-span-3 space-y-8">
+        
+        <!-- Teacher Attendance -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-user-tie"></i></div>
+                    <h3 class="text-lg font-black text-slate-800">Teacher Check-in <span class="text-slate-400 font-normal ml-2">(Check Teacher Timesheets)</span></h3>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <tr>
+                            <th class="px-6 py-4">Professor Name</th>
+                            <th class="px-6 py-4">Role</th>
+                            <th class="px-6 py-4">Hours</th>
+                            <th class="px-6 py-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for t in teacher_list %}
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 flex-shrink-0 text-slate-400 flex items-center justify-center text-xs font-bold uppercase">
+                                        {% if t.profile.profile_image %}<img src="{{ t.profile.profile_image.url }}" class="w-full h-full rounded-full object-cover">
+                                        {% else %}{{ t.profile.user.first_name|first }}{% endif %}
+                                    </div>
+                                    <span class="font-bold text-slate-700">{{ t.profile.full_name_en }}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4"><span class="text-xs text-slate-500 font-medium">{{ t.profile.role.name }}</span></td>
+                            <td class="px-6 py-4">
+                                <span class="font-black tabular-nums text-slate-800">{{ t.record.hours_worked|default:"0" }} hr</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                {% if t.record %}
+                                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest"><i class="fas fa-check mr-1"></i> Logged</span>
+                                {% else %}
+                                <a href="{% url 'backoffice:timesheet-add' %}?employee={{ t.profile.pk }}&date={{ selected_date|date:'Y-m-d' }}" 
+                                   class="px-3 py-1 bg-slate-100 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full text-[10px] font-black uppercase tracking-widest transition">
+                                   Pending
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Student Attendance (By Class) -->
+        <div class="space-y-6">
+            <h3 class="text-lg font-black text-slate-800 flex items-center gap-3 px-2">
+                <i class="fas fa-users text-blue-500"></i>
+                Student Attendance (By Class)
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for c in class_data %}
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 bg-blue-50 border-b border-blue-100 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">{{ c.class.time_slot }}</p>
+                            <h4 class="font-black text-slate-800 uppercase tracking-tight">{{ c.class.course.name }}</h4>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-slate-500 italic">Teacher: {% if c.class.teacher %}{{ c.class.teacher.get_full_name|default:c.class.teacher.username }}{% else %}<span class="text-red-400">No Teacher Assigned</span>{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50">
+                                <tr>
+                                    <th class="px-3 py-3">Student Name</th>
+                                    <th class="px-3 py-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                {% for s in c.students %}
+                                <tr class="hover:bg-slate-50 group">
+                                    <td class="px-3 py-3">
+                                        <p class="font-bold text-slate-700">{{ s.enrollment.student.full_name }}</p>
+                                        <p class="text-[10px] text-slate-400">{{ s.enrollment.student.nick_name }}</p>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        {% if s.record %}
+                                        <span class="font-black uppercase tracking-tighter
+                                            {% if s.record.status == 'P' %}text-emerald-500{% elif s.record.status == 'A' %}text-red-500{% else %}text-amber-500{% endif %}">
+                                            {{ s.record.get_status_display }}
+                                        </span>
+                                        {% else %}
+                                        <a href="{% url 'backoffice:dailychecklist-add' %}?enrollment={{ s.enrollment.pk }}&date={{ selected_date|date:'Y-m-d' }}" 
+                                           class="text-blue-500 font-black uppercase hover:underline">Check</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-2 p-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                    <i class="fas fa-calendar-times text-4xl text-slate-200 mb-4"></i>
+                    <p class="text-slate-400 font-bold italic tracking-wide">No active classes found for this date.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

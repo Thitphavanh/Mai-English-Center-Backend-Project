@@ -107,6 +107,7 @@ class BaseGenericListView(StaffRequiredMixin, ListView):
         context['headers'] = headers
         context['rows'] = rows
         context['title'] = self.model._meta.verbose_name_plural.title()
+        context['model_name'] = self.model.__name__
         
         # Inject context for Student list filter dropdown
         if self.model.__name__ == 'Student':
@@ -330,3 +331,52 @@ PayrollSummaryList, PayrollSummaryCreate, PayrollSummaryUpdate, PayrollSummaryDe
 # AUTH
 UserList, UserCreate, UserUpdate, UserDelete = create_crud_views(User, ['username', 'first_name', 'last_name', 'email', 'is_staff'])
 GroupList, GroupCreate, GroupUpdate, GroupDelete = create_crud_views(Group, ['name'])
+# TEMPLATES & DOCUMENTS
+class TuitionInvoiceView(StaffRequiredMixin, TemplateView):
+    template_name = "backoffice/templates/tuition_invoice.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['invoice'] = TuitionFee.objects.select_related('enrollment__student', 'enrollment__class_schedule').get(pk=self.kwargs['pk'])
+        return context
+
+class StudentIDCardView(StaffRequiredMixin, TemplateView):
+    template_name = "backoffice/templates/student_id_card.html"
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['student'] = Student.objects.get(pk=self.kwargs['pk'])
+        return context
+
+class AttendancePortalView(StaffRequiredMixin, TemplateView):
+    template_name = "backoffice/templates/attendance_portal.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        import datetime
+        date_str = self.request.GET.get('date', datetime.date.today().isoformat())
+        try:
+            selected_date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+        except:
+            selected_date = datetime.date.today()
+            
+        # Teachers
+        teachers = EmployeeProfile.objects.select_related('user', 'role').all()
+        teacher_list = []
+        for t in teachers:
+            record = t.timesheets.filter(date=selected_date).first()
+            teacher_list.append({'profile': t, 'record': record})
+            
+        # Classes & Students
+        classes = ClassSchedule.objects.select_related('course', 'teacher').filter(is_active=True).order_by('time_slot')
+        class_data = []
+        for cs in classes:
+            enrollments = cs.enrollments.select_related('student').all()
+            student_records = []
+            for en in enrollments:
+                record = en.daily_records.filter(date=selected_date).first()
+                student_records.append({'enrollment': en, 'record': record})
+            class_data.append({'class': cs, 'students': student_records})
+            
+        context['selected_date'] = selected_date
+        context['teacher_list'] = teacher_list
+        context['class_data'] = class_data
+        return context
