@@ -65,3 +65,8 @@ celerybeat.pid
 
 # mypy
 .mypy_cache/
+
+
+README.md
+.gitignore
+
