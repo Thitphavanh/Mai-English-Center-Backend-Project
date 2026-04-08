@@ -8,19 +8,73 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Lexend & Source Sans 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --primary: #4F46E5; /* Indigo-600 */
+            --primary-hover: #4338CA;
+            --accent: #F97316; /* Orange-500 */
+            --bg-main: #F8FAFC; /* Slate-50 */
+            --text-dark: #0F172A; /* Slate-900 */
+            --sidebar-width: 280px;
+        }
+        body { font-family: 'Source Sans 3', sans-serif; background-color: var(--bg-main); color: var(--text-dark); }
+        h1, h2, h3, h4, .font-heading { font-family: 'Lexend', sans-serif; }
+        
+        .sidebar { background-color: #1E1B4B; transition: all 0.3s ease; }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            color: #94A3B8;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        .sidebar-link:hover { background-color: rgba(255, 255, 255, 0.05); color: #F1F5F9; }
+        .sidebar-link.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        }
+        .sidebar-link i { font-size: 1.1rem; width: 1.5rem; text-align: center; margin-right: 0.75rem; }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+
+        .btn-premium {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-premium:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="antialiased">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 text-white flex flex-col transition-all duration-300">
-            <div class="p-6 border-b border-slate-700 flex items-center justify-center">
-                <i class="fas fa-graduation-cap text-3xl text-blue-400 mr-3"></i>
-                <h1 class="text-xl font-bold tracking-wider">MAI Center</h1>
+        <aside class="w-[280px] sidebar text-white flex flex-col shrink-0">
+            <div class="p-8 flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center shadow-lg">
+                    <i class="fas fa-graduation-cap text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">MAI Center</h1>
             </div>
             <nav class="flex-1 overflow-y-auto py-4">
                 <ul class="space-y-1">
@@ -60,6 +114,13 @@
                         <a href="{% url 'backoffice:dailychecklist-list' %}" class="flex items-center px-6 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition group">
                             <i class="fas fa-tasks w-5 text-center mr-3 group-hover:text-blue-400 transition"></i>
                             <span class="font-medium">Daily Checklists</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'backoffice:checklist-grid' %}" class="flex items-center px-6 py-2 text-slate-300 hover:bg-slate-800 hover:text-white transition group border-l-2 border-amber-600/50 bg-slate-800/10">
+                            <i class="fas fa-table w-5 text-center mr-3 text-amber-500 group-hover:scale-110 transition"></i>
+                            <span class="font-medium text-amber-100">Checklist Grid (ໝາຍຊື່ລວມ)</span>
+                            <span class="ml-2 px-1.5 py-0.5 bg-amber-500 text-slate-900 text-[9px] font-bold rounded-full uppercase">New</span>
                         </a>
                     </li>
                     <li>

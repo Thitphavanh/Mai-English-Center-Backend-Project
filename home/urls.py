@@ -16,6 +16,10 @@ urlpatterns = [
     path("portal/logout/", views.portal_logout, name="portal_logout"),
     path("portal/dashboard/", views.portal_dashboard, name="portal_dashboard"),
     
+    # ໜ້າຫຼັກສູດທັງໝົດ
+    path("courses/", views.course_list, name="course_list"),
+    path("courses/<int:course_id>/", views.course_detail, name="course_detail"),
+    
     # ໜ້າປະເມີນຜົນການຮຽນຮູ້ (Learning Assessment)
     path("assessment/", views.learning_assessment, name="learning_assessment"),
 ]

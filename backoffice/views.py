@@ -380,3 +380,187 @@ class AttendancePortalView(StaffRequiredMixin, TemplateView):
         context['teacher_list'] = teacher_list
         context['class_data'] = class_data
         return context
+
+
+# ===== CHECKLIST GRID VIEW (ໝາຍຊື່ນັກຮຽນແບບຕາຕະລາງ) =====
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def checklist_grid_view(request):
+    """Grid view for daily student attendance checklist, similar to payroll report."""
+    import datetime
+    from calendar import monthrange
+    from django.db.models import Q
+    
+    month_query = request.GET.get('month', str(datetime.date.today().month))
+    year_query = request.GET.get('year', str(datetime.date.today().year))
+    class_id = request.GET.get('class_id', '')
+    search_query = request.GET.get('search', '').strip()
+    
+    try:
+        month_int = int(month_query)
+        year_int = int(year_query)
+        _, num_days = monthrange(year_int, month_int)
+    except:
+        today = datetime.date.today()
+        month_int, year_int = today.month, today.year
+        _, num_days = monthrange(year_int, month_int)
+    
+    # Get all active class schedules for filter dropdown
+    all_classes = ClassSchedule.objects.select_related('course', 'teacher').filter(is_active=True).order_by('course__name', 'time_slot')
+    
+    # Filter enrollments  
+    enrollments = Enrollment.objects.select_related(
+        'student', 'class_schedule', 'class_schedule__course', 'class_schedule__teacher'
+    )
+    
+    if class_id:
+        enrollments = enrollments.filter(class_schedule_id=class_id)
+    
+    if search_query:
+        enrollments = enrollments.filter(
+            Q(student__full_name__icontains=search_query) |
+            Q(student__nick_name__icontains=search_query) |
+            Q(student__student_id__icontains=search_query)
+        )
+    
+    enrollments = enrollments.order_by('class_schedule__course__name', 'student__full_name')
+    
+    # Pre-fetch all checklist records for the month
+    checklist_records = DailyChecklist.objects.filter(
+        date__year=year_int, date__month=month_int,
+        enrollment__in=enrollments
+    )
+    
+    # Build a lookup dict: {enrollment_id: {day: status}}
+    cl_dict = {}
+    for rec in checklist_records:
+        if rec.enrollment_id not in cl_dict:
+            cl_dict[rec.enrollment_id] = {}
+        cl_dict[rec.enrollment_id][rec.date.day] = rec.status
+    
+    lao_weekdays = ['ຈັນ', 'ອັງຄານ', 'ພຸດ', 'ພະຫັດ', 'ສຸກ', 'ເສົາ', 'ອາທິດ']
+    days_info = []
+    for day in range(1, num_days + 1):
+        dt = datetime.date(year_int, month_int, day)
+        days_info.append({
+            'day': day,
+            'weekday': lao_weekdays[dt.weekday()]
+        })
+        
+    days_range = list(range(1, num_days + 1))
+    
+    # Build rows
+    checklist_data = []
+    for en in enrollments:
+        en_statuses = cl_dict.get(en.id, {})
+        daily_statuses = [en_statuses.get(day, '') for day in days_range]
+        
+        # Count P, L, A, E
+        present_count = sum(1 for s in daily_statuses if s == 'P')
+        late_count = sum(1 for s in daily_statuses if s == 'L')
+        absent_count = sum(1 for s in daily_statuses if s == 'A')
+        leave_count = sum(1 for s in daily_statuses if s == 'E')
+        
+        # Calculate effective hours
+        course_type = en.class_schedule.course.class_type
+        hours_per_session = 2 if course_type == 'WN' else 1
+        effective_hours = (present_count * hours_per_session) + (late_count * hours_per_session * 0.5)
+        total_hours = en.class_schedule.total_hours_per_month
+        
+        # Calculate attendance score (out of 20)
+        if total_hours > 0:
+            attendance_score = round((effective_hours / float(total_hours)) * 20, 2)
+            if attendance_score > 20:
+                attendance_score = 20
+        else:
+            attendance_score = 0
+        
+        checklist_data.append({
+            'enrollment': en,
+            'daily_statuses': daily_statuses,
+            'present_count': present_count,
+            'late_count': late_count,
+            'absent_count': absent_count,
+            'leave_count': leave_count,
+            'effective_hours': effective_hours,
+            'total_hours': total_hours,
+            'attendance_score': attendance_score,
+        })
+    
+    context = {
+        'search_query': search_query,
+        'month': f"{month_int:02d}",
+        'year': str(year_int),
+        'month_year': f"{month_int:02d}/{year_int}",
+        'days_range': days_range,
+        'days_info': days_info,
+        'checklist_data': checklist_data,
+        'all_classes': all_classes,
+        'selected_class_id': class_id,
+    }
+    return render(request, 'backoffice/templates/checklist_grid.html', context)
+
+
+@require_POST
+def update_checklist(request):
+    """AJAX endpoint to update a single DailyChecklist cell."""
+    import datetime
+    try:
+        data = json.loads(request.body)
+        enrollment_id = data.get('enrollment_id')
+        year = int(data.get('year'))
+        month = int(data.get('month'))
+        day = int(data.get('day'))
+        status = data.get('status', '').strip()
+        
+        target_date = datetime.date(year, month, day)
+        
+        if status in ['P', 'A', 'L', 'E']:
+            DailyChecklist.objects.update_or_create(
+                enrollment_id=enrollment_id,
+                date=target_date,
+                defaults={'status': status}
+            )
+        else:
+            # Empty status = delete record
+            DailyChecklist.objects.filter(enrollment_id=enrollment_id, date=target_date).delete()
+        
+        return JsonResponse({'status': 'success', 'message': 'Checklist updated'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+@require_POST
+def batch_update_checklist(request):
+    """AJAX endpoint to batch update daily checklists for one student."""
+    import datetime
+    try:
+        data = json.loads(request.body)
+        enrollment_id = data.get('enrollment_id')
+        year = int(data.get('year'))
+        month = int(data.get('month'))
+        updates = data.get('updates', [])
+        
+        for upd in updates:
+            day = int(upd.get('day'))
+            status = upd.get('status', '').strip()
+            target_date = datetime.date(year, month, day)
+            
+            if status in ['P', 'A', 'L', 'E']:
+                DailyChecklist.objects.update_or_create(
+                    enrollment_id=enrollment_id,
+                    date=target_date,
+                    defaults={'status': status}
+                )
+            else:
+                DailyChecklist.objects.filter(enrollment_id=enrollment_id, date=target_date).delete()
+        
+        return JsonResponse({'status': 'success', 'message': 'Batch checklist updated'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+

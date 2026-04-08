@@ -97,12 +97,22 @@ def monthly_payroll_report(request):
             'total_amount_formatted': "{:,.0f}".format(total_amount)
         })
         
+    lao_weekdays = ['ຈັນ', 'ອັງຄານ', 'ພຸດ', 'ພະຫັດ', 'ສຸກ', 'ເສົາ', 'ອາທິດ']
+    days_info = []
+    for day in range(1, num_days + 1):
+        dt = datetime.date(year_int, month_int, day)
+        days_info.append({
+            'day': day,
+            'weekday': lao_weekdays[dt.weekday()]
+        })
+
     context = {
         'search_query': search_query,
         'month': f"{month_int:02d}",
         'year': str(year_int),
         'month_year': f"{month_int:02d}/{year_int}",
         'days_range': days_range,
+        'days_info': days_info,
         'payroll_data': payroll_data,
         'grand_total_amount': grand_total_amount,
         'grand_total_amount_formatted': "{:,.0f}".format(grand_total_amount),

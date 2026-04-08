@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Courses | Mai English Center{% endblock %}
+
+{% block extra_head %}
+<!-- Font Awesome for premium icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="relative bg-slate-900 py-24 pb-32 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-20 -right-20 w-80 h-80 bg-brand rounded-full mix-blend-multiply filter blur-[80px] opacity-40"></div>
+        <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-purple-600 rounded-full mix-blend-multiply filter blur-[80px] opacity-40"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">ຫຼັກສູດການຮຽນທັງໝົດ</h1>
+        <p class="text-lg text-slate-300 max-w-2xl mx-auto">
+            ຄົ້ນພົບຫຼັກສູດການຮຽນພາສາອັງກິດທີ່ເໝາະສົມກັບທ່ານ ປູພື້ນຖານ ແລະ ພັດທະນາໃຫ້ເກັ່ງຂຶ້ນ.
+        </p>
+    </div>
+</div>
+
+<!-- Courses Grid -->
+<section class="py-12 bg-slate-50 relative -mt-16 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div class="mb-8 flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-slate-800">ທັງໝົດ <span class="text-brand">{{ total_courses }}</span> ຫຼັກສູດ</h2>
+            <a href="{% url 'home:index' %}" class="text-sm font-bold text-slate-500 hover:text-brand transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> ກັບຄືນໜ້າຫຼັກ</a>
+        </div>
+
+        {% if courses %}
+        <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for course in courses %}
+            <div class="group bg-white p-6 rounded-[1.5rem] border border-slate-200 hover:border-brand/30 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden flex flex-col h-full">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-brand/5 to-purple-500/5 rounded-bl-[3rem] -mr-6 -mt-6 transition-transform group-hover:scale-150 duration-500 z-0"></div>
+                <div class="relative z-10 flex flex-col flex-grow">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 text-brand mb-4 shadow-sm border border-slate-100 group-hover:bg-brand group-hover:text-white transition-colors duration-300">
+                        <i class="fa-solid fa-book text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-800 mb-2">{{ course.name }}</h3>
+                    {% if course.book_name %}
+                    <div class="text-[10px] font-bold text-purple-600 bg-purple-50 inline-block px-3 py-1 rounded-full uppercase tracking-wider mb-3">{{ course.book_name }}</div>
+                    {% endif %}
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
+                        {{ course.description|default:"ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ." }}
+                    </p>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
+                        <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full"><i class="fa-solid fa-tag mr-1"></i> Class</span>
+                        <a href="{% url 'home:course_detail' course.id %}" class="text-sm font-bold text-brand hover:text-brand-dark transition-colors inline-flex items-center">
+                            ເບິ່ງລາຍລະອຽດ <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination Controls -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-16 flex justify-center">
+            <nav class="inline-flex rounded-full shadow-md bg-white p-1 border border-slate-200" aria-label="Pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex items-center justify-center w-10 h-10 text-slate-500 hover:text-brand hover:bg-slate-50 rounded-full transition-colors">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                {% else %}
+                <span class="inline-flex items-center justify-center w-10 h-10 text-slate-300 rounded-full">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </span>
+                {% endif %}
+
+                <div class="flex items-center px-2 space-x-1">
+                {% for i in page_obj.paginator.page_range %}
+                    {% if page_obj.number == i %}
+                    <span class="inline-flex items-center justify-center w-10 h-10 bg-brand text-white font-bold rounded-full shadow-sm">
+                        {{ i }}
+                    </span>
+                    {% else %}
+                    <a href="?page={{ i }}" class="inline-flex items-center justify-center w-10 h-10 text-slate-600 hover:bg-slate-50 hover:text-brand font-medium rounded-full transition-colors">
+                        {{ i }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="inline-flex items-center justify-center w-10 h-10 text-slate-500 hover:text-brand hover:bg-slate-50 rounded-full transition-colors">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </a>
+                {% else %}
+                <span class="inline-flex items-center justify-center w-10 h-10 text-slate-300 rounded-full">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </span>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center p-16 bg-white rounded-3xl border border-slate-200 shadow-sm">
+            <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 text-slate-300 mb-6">
+                <i class="fa-solid fa-folder-open text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-600">ຍັງບໍ່ມີຂໍ້ມູນຫຼັກສູດໃນຂະນະນີ້</h3>
+            <p class="text-slate-400 mt-2">ສາມາດເພີ່ມຫຼັກສູດໄດ້ຈາກໜ້າ Backoffice</p>
+            <a href="{% url 'home:index' %}" class="mt-6 inline-block px-6 py-3 bg-brand text-white font-bold rounded-full hover:bg-brand-dark transition-colors">ກັບຄືນໜ້າຫຼັກ</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

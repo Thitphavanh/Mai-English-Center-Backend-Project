@@ -60,3 +60,10 @@ urlpatterns += [
 urlpatterns += [
     path('attendance/', views.AttendancePortalView.as_view(), name='attendance-portal'),
 ]
+
+# CHECKLIST GRID (ໝາຍຊື່ນັກຮຽນແບບຕາຕະລາງ)
+urlpatterns += [
+    path('checklist-grid/', views.checklist_grid_view, name='checklist-grid'),
+    path('api/update-checklist/', views.update_checklist, name='update-checklist'),
+    path('api/batch-update-checklist/', views.batch_update_checklist, name='batch-update-checklist'),
+]

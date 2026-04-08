@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course.name }} | Mai English Center{% endblock %}
+
+{% block extra_head %}
+<!-- Font Awesome for premium icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .float-anim {
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative min-h-screen bg-slate-50 overflow-hidden">
+    <!-- Background Decorations -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-brand/10 rounded-full blur-[100px] float-anim"></div>
+        <div class="absolute bottom-[5%] left-[-5%] w-[30%] h-[30%] bg-purple-500/10 rounded-full blur-[100px]" style="animation-delay: -2s;"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12">
+        <!-- Navigation -->
+        <div class="mb-8">
+            <a href="{% url 'home:course_list' %}" class="inline-flex items-center text-slate-500 hover:text-brand font-bold transition-all group">
+                <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center mr-3 group-hover:bg-brand group-hover:text-white transition-all">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+                ກັບຄືນລາຍການຫຼັກສູດ
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <!-- Left Content: Course Detail -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100">
+                    <!-- Course Header Image/Pattern -->
+                    <div class="h-48 bg-gradient-to-r from-brand to-blue-600 relative">
+                        <div class="absolute inset-0 opacity-20" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
+                        <div class="absolute -bottom-12 left-10">
+                            <div class="w-24 h-24 rounded-3xl bg-white shadow-lg flex items-center justify-center text-brand text-4xl border-4 border-white">
+                                <i class="fa-solid fa-book-open"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-16 pb-12 px-10">
+                        <div class="flex flex-wrap items-center gap-3 mb-4">
+                            <span class="px-4 py-1.5 rounded-full bg-brand/10 text-brand text-xs font-black uppercase tracking-widest">
+                                Premium Course
+                            </span>
+                            {% if course.book_name %}
+                            <span class="px-4 py-1.5 rounded-full bg-purple-50 text-purple-600 text-xs font-black uppercase tracking-widest">
+                                {{ course.book_name }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
+                            {{ course.name }}
+                        </h1>
+
+                        <div class="flex flex-wrap gap-6 mb-10 pb-10 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Created At</p>
+                                    <p class="text-sm font-bold text-slate-700">{{ course.created_at|date:"d M Y" }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Duration</p>
+                                    <p class="text-sm font-bold text-slate-700">Flexible Schedule</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="prose prose-slate max-w-none">
+                            <h3 class="text-2xl font-black text-slate-800 mb-4">ລາຍລະອຽດຫຼັກສູດ</h3>
+                            <p class="text-slate-600 text-lg leading-relaxed mb-6">
+                                {{ course.description|default:"ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ. ອອກແບບມາເພື່ອໃຫ້ນັກຮຽນສາມາດພັດທະນາທັກສະທັງ 4 ດ້ານ: ຟັງ, ເວົ້າ, ອ່ານ ແລະ ຂຽນ ຢ່າງເປັນລະບົບ." }}
+                            </p>
+                            
+                            <h3 class="text-2xl font-black text-slate-800 mb-4 mt-10">ສິ່ງທີ່ຈະໄດ້ຮັບຈາກຫຼັກສູດນີ້</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start gap-3">
+                                    <div class="mt-1 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </div>
+                                    <span class="text-slate-600 font-medium">ພັດທະນາທັກສະການອອກສຽງ (Pronunciation) ໃຫ້ຖືກຕ້ອງ.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="mt-1 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </div>
+                                    <span class="text-slate-600 font-medium">ຮຽນຮູ້ຄຳສັບ ແລະ ໄວຍາກອນທີ່ຈຳເປັນໃນຊີວິດປະຈຳວັນ.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="mt-1 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </div>
+                                    <span class="text-slate-600 font-medium">ສ້າງຄວາມໝັ້ນໃຈໃນການສື່ສານກັບຊາວຕ່າງຊາດ.</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <div class="mt-1 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                        <i class="fa-solid fa-check text-xs"></i>
+                                    </div>
+                                    <span class="text-slate-600 font-medium">ສິ່ງອຳນວຍຄວາມສະດວກໃນການຮຽນທີ່ທັນສະໄໝ.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content: Sidebar/CTA -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-32 space-y-8">
+                    <!-- Registration Card -->
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-brand/5 rounded-bl-[3rem] -mr-6 -mt-6"></div>
+                        
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-black text-slate-800 mb-2">ສົນໃຈຮຽນບໍ່?</h3>
+                            <p class="text-slate-500 mb-8 font-medium">
+                                ເລີ່ມຕົ້ນການຮຽນຮູ້ຂອງທ່ານກັບ ສູນພາສາອັງກິດໃໝ່ (Mai English Center) ມື້ນີ້!
+                            </p>
+
+                            <a href="{% url 'home:portal_register' %}" class="w-full inline-flex items-center justify-center px-8 py-5 bg-brand text-white font-black rounded-2xl shadow-lg border-b-4 border-brand-dark hover:translate-y-[-4px] hover:shadow-xl transition-all duration-300">
+                                ສະໝັກຮຽນເລີຍ <i class="fa-solid fa-paper-plane ml-3"></i>
+                            </a>
+
+                            <div class="mt-8 pt-8 border-t border-slate-100 space-y-4">
+                                <div class="flex items-center gap-4 text-slate-600">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                                        <i class="fa-solid fa-headset"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Contact Us</p>
+                                        <p class="text-sm font-bold">+856 20 XXXX XXXX</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 text-slate-600">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Location</p>
+                                        <p class="text-sm font-bold">Ban Phonsinovuan, Vientiane</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Small Banner -->
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2rem] p-8 text-white relative overflow-hidden group">
+                        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/micro-carbon.png')]"></div>
+                        <div class="relative z-10">
+                            <i class="fa-solid fa-shield-halved text-brand text-3xl mb-4 group-hover:scale-110 transition-transform"></i>
+                            <h4 class="text-xl font-bold mb-2">Quality Teaching</h4>
+                            <p class="text-slate-400 text-sm">ສອນໂດຍອາຈານທີ່ມີປະສົບການ ແລະ ເນັ້ນໃສ່ຄວາມເຂົ້າໃຈຂອງຜູ້ຮຽນເປັນຫຼັກ.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

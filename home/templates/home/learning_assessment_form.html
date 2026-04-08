@@ -173,12 +173,15 @@
                         </label>
                         <div class="relative">
                             <input type="number" id="score_attendance" name="score_attendance"
-                                   min="0" max="20" step="0.5" placeholder="0"
+                                   min="0" max="20" step="0.01" placeholder="0"
                                    class="score-comp w-full px-4 py-3 border-2 border-amber-200 rounded-xl text-lg font-extrabold text-amber-700 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 transition bg-white"
                                    data-max="20">
                             <div class="absolute inset-y-0 right-3 flex items-center text-sm font-bold text-amber-300 pointer-events-none">/20</div>
+                            <!-- Auto-calc badge (hidden by default, shown via JS) -->
+                            <span id="attendanceAutoBadge" class="hidden absolute -top-2 -right-2 w-5 h-5 bg-amber-500 text-white rounded-full text-[9px] flex items-center justify-center font-bold shadow" title="ຄິດໄລ່ອັດຕະໂນມັດຈາກ Checklist">⚡</span>
                         </div>
                         <p class="text-xs text-slate-400">20%</p>
+                        <p id="attendanceAutoHint" class="hidden text-[10px] text-amber-600 font-medium">📋 ອັດຕະໂນມັດຈາກ Checklist ໝາຍຊື່</p>
                     </div>
 
                     <!-- Quiz /30 -->
@@ -522,6 +525,9 @@
             });
 
             // ── 2.5 Auto-pull scores when student is selected ──────────────
+            const attendanceBadge = document.getElementById('attendanceAutoBadge');
+            const attendanceHint = document.getElementById('attendanceAutoHint');
+            
             studentSelect.addEventListener('change', function() {
                 const enrollmentId = parseInt(this.value, 10);
                 const scoreActivity = document.getElementById('score_activity');
@@ -539,6 +545,20 @@
                     scoreQuiz.value = entry.latest_score.quiz;
                     scoreExercise.value = entry.latest_score.exercise;
                     
+                    // Handle auto-calculated attendance
+                    if (entry.attendance_auto) {
+                        scoreAttendance.readOnly = true;
+                        scoreAttendance.classList.add('bg-amber-50', 'border-amber-400');
+                        attendanceBadge.classList.remove('hidden');
+                        attendanceHint.classList.remove('hidden');
+                        attendanceHint.innerHTML = `📋 ອັດຕະໂນມັດຈາກ Checklist (P:${entry.checklist_p} L:${entry.checklist_l} A:${entry.checklist_a})`;
+                    } else {
+                        scoreAttendance.readOnly = false;
+                        scoreAttendance.classList.remove('bg-amber-50', 'border-amber-400');
+                        attendanceBadge.classList.add('hidden');
+                        attendanceHint.classList.add('hidden');
+                    }
+                    
                     // Show a subtle animation/highlight to show it was auto-filled
                     const inputs = [scoreActivity, scoreAttendance, scoreQuiz, scoreExercise];
                     inputs.forEach(inp => {
@@ -549,6 +569,11 @@
                     recalcScores();
                 } else {
                     // Reset if no score found or student unselected
+                    scoreAttendance.readOnly = false;
+                    scoreAttendance.classList.remove('bg-amber-50', 'border-amber-400');
+                    attendanceBadge.classList.add('hidden');
+                    attendanceHint.classList.add('hidden');
+                    
                     const inputs = [scoreActivity, scoreAttendance, scoreQuiz, scoreExercise];
                     inputs.forEach(inp => inp.value = '');
                     recalcScores();

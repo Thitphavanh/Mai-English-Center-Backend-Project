@@ -28,8 +28,11 @@
                     <th class="p-2 border sticky left-0 bg-gray-100 z-10 w-10">ລ/ດ</th>
                     <th class="p-2 border sticky left-10 bg-gray-100 z-10">ລາຍຊື່ພະນັກງານ</th>
                     <th class="p-2 border sticky left-44 bg-gray-100 z-10">ເບີໂທຕິດຕໍ່</th>
-                    {% for day in days_range %}
-                    <th class="p-2 border w-8">{{ day }}</th>
+                    {% for info in days_info %}
+                    <th class="p-2 border w-8 text-[10px] leading-tight min-w-[32px]">
+                        <span class="block text-gray-400 font-normal">{{ info.weekday }}</span>
+                        <span class="block font-bold">{{ info.day }}</span>
+                    </th>
                     {% endfor %}
                     <th class="p-2 border font-bold">ລວມຊົ່ວໂມງ</th>
                     <th class="p-2 border font-bold text-green-700">ລວມຈຳນວນເງິນ</th>

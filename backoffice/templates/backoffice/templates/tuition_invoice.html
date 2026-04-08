@@ -4,7 +4,7 @@
 {% block header_title %}Student Tuition Invoice{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto my-8 bg-white shadow-lg border border-gray-100 rounded-2xl overflow-hidden print:shadow-none print:border-0 border-t-8 border-t-slate-900">
+<div class="max-w-4xl mx-auto my-8 bg-white shadow-lg border border-gray-100 rounded-2xl overflow-hidden print:shadow-none print:border-0 border-t-8 border-t-slate-900 min-h-screen-print">
     <!-- Header -->
     <div class="p-8 md:p-12 flex flex-col md:flex-row justify-between items-start gap-8 bg-slate-50 border-b border-slate-100">
         <div class="flex items-center gap-6">
@@ -116,7 +116,7 @@
     </div>
 
     <!-- Contact Info -->
-    <div class="bg-slate-900 p-10 flex flex-wrap justify-between items-center gap-8">
+    <div class="bg-slate-900 p-10 flex flex-wrap justify-between items-center gap-8 print-footer-push">
         <div class="flex flex-wrap gap-10">
             <div class="space-y-1">
                 <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Office Phone</p>
@@ -151,11 +151,29 @@
 
 <style>
     @media print {
-        body { background-color: white !important; }
-        aside, header, footer { display: none !important; }
-        main { padding: 0 !important; margin: 0 !important; }
-        .flex-1 { overflow: visible !important; }
-        .bg-slate-50 { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        body { 
+            background-color: white !important; 
+            margin: 0 !important; 
+            padding: 0 !important;
+        }
+        aside, header, nav { display: none !important; }
+        #sidebar, #navbar { display: none !important; }
+        main, .flex-1 { padding: 0 !important; margin: 0 !important; overflow: visible !important; width: 100% !important; }
+        .bg-slate-50 { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .bg-slate-900 { background-color: #0f172a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .bg-blue-600 { background-color: #2563eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .text-white { color: #ffffff !important; }
+        .max-w-4xl { max-width: none !important; width: 100% !important; }
+        .my-8 { margin-top: 0 !important; margin-bottom: 0 !important; }
+        .rounded-2xl, .rounded-3xl { border-radius: 0 !important; }
+        .shadow-lg, .shadow-2xl { box-shadow: none !important; }
+        /* Make invoice height 100% of the page to push footer down if needed */
+        .min-h-screen-print { min-height: 100vh; display: flex; flex-direction: column; }
+        .print-footer-push { margin-top: auto; }
     }
 </style>
 {% endblock %}

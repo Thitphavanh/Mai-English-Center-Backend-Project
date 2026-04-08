@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto mt-10 p-6 bg-white rounded-lg shadow-md max-w-full overflow-x-hidden">
+    <div class="flex flex-wrap justify-between items-center mb-6 border-b pb-4 gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">📋 CHECKLIST ໝາຍຊື່ນັກຮຽນ</h2>
+            <p class="text-gray-600">ປະຈຳເດືອນ: <span class="font-bold text-blue-700">{{ month_year }}</span></p>
+        </div>
+        <form method="get" class="flex flex-wrap space-x-2 gap-y-2 justify-end items-center">
+            <input type="text" name="search" value="{{ search_query|default:'' }}" class="border p-2 rounded w-48 shadow-sm text-sm" placeholder="🔍 ຄົ້ນຫາຊື່ນັກຮຽນ...">
+            
+            <!-- Class Filter -->
+            <select name="class_id" class="border p-2 rounded w-56 shadow-sm text-sm bg-white">
+                <option value="">-- ທຸກຫ້ອງ --</option>
+                {% for cls in all_classes %}
+                <option value="{{ cls.id }}" {% if selected_class_id == cls.id|stringformat:"d" %}selected{% endif %}>
+                    {{ cls.course.name }} ({{ cls.time_slot }})
+                </option>
+                {% endfor %}
+            </select>
+            
+            <input type="number" name="month" value="{{ month }}" min="1" max="12" class="border p-2 rounded w-20 shadow-sm text-sm" placeholder="MM">
+            <input type="number" name="year" value="{{ year }}" min="2020" class="border p-2 rounded w-24 shadow-sm text-sm" placeholder="YYYY">
+            
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition font-semibold text-sm">
+                <i class="fas fa-search"></i> ຄົ້ນຫາ
+            </button>
+        </form>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap gap-4 mb-4 text-xs font-bold">
+        <span class="flex items-center gap-1"><span class="w-6 h-6 rounded bg-green-100 text-green-700 flex items-center justify-center border border-green-300">P</span> ມາ (Present)</span>
+        <span class="flex items-center gap-1"><span class="w-6 h-6 rounded bg-yellow-100 text-yellow-700 flex items-center justify-center border border-yellow-300">L</span> ມາສາຍ (Late)</span>
+        <span class="flex items-center gap-1"><span class="w-6 h-6 rounded bg-red-100 text-red-700 flex items-center justify-center border border-red-300">A</span> ຂາດ (Absent)</span>
+        <span class="flex items-center gap-1"><span class="w-6 h-6 rounded bg-blue-100 text-blue-700 flex items-center justify-center border border-blue-300">E</span> ລາ (Leave)</span>
+    </div>
+
+    <!-- Checklist Grid Table -->
+    <div class="overflow-x-auto w-full">
+        <table class="min-w-full border-collapse border border-gray-300 text-sm whitespace-nowrap">
+            <thead>
+                <tr class="bg-gray-100 text-center">
+                    <th class="p-2 border sticky left-0 bg-gray-100 z-10 w-10">ລ/ດ</th>
+                    <th class="p-2 border sticky left-10 bg-gray-100 z-10 min-w-[180px] text-left">ຊື່ ແລະ ນາມສະກຸນ</th>
+                    <th class="p-2 border sticky left-[220px] bg-gray-100 z-10 min-w-[80px]">ຊື່ຫຼິ້ນ</th>
+                    {% for info in days_info %}
+                    <th class="p-2 border w-8 text-[10px] leading-tight min-w-[32px]">
+                        <span class="block text-gray-400 font-normal">{{ info.weekday }}</span>
+                        <span class="block font-bold">{{ info.day }}</span>
+                    </th>
+                    {% endfor %}
+                    <th class="p-2 border font-bold text-green-700 text-xs">P</th>
+                    <th class="p-2 border font-bold text-yellow-600 text-xs">L</th>
+                    <th class="p-2 border font-bold text-red-600 text-xs">A</th>
+                    <th class="p-2 border font-bold text-blue-600 text-xs">E</th>
+                    <th class="p-2 border font-bold text-xs bg-blue-50">ຊມ.</th>
+                    <th class="p-2 border font-bold text-xs bg-green-50 text-green-800">Att/20</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in checklist_data %}
+                <tr class="border hover:bg-gray-50 text-center">
+                    <td class="p-2 border sticky left-0 bg-white z-10 text-xs">{{ forloop.counter }}</td>
+                    <td class="p-2 border font-semibold text-left sticky left-10 bg-white z-10 text-xs">
+                        <a href="#" class="text-blue-600 truncate max-w-[180px] student-name-link" 
+                           data-enrollment-id="{{ row.enrollment.id }}"
+                           data-student-name="{{ row.enrollment.student.full_name }}">
+                            {{ row.enrollment.student.full_name }}
+                        </a>
+                        <span class="block text-[10px] text-gray-400">{{ row.enrollment.class_schedule.course.name }} ({{ row.enrollment.class_schedule.time_slot }})</span>
+                    </td>
+                    <td class="p-2 border sticky left-[220px] bg-white z-10 text-xs text-gray-500">{{ row.enrollment.student.nick_name|default:"-" }}</td>
+                    
+                    {% for status in row.daily_statuses %}
+                    <td class="p-1 border cursor-pointer hover:bg-gray-200 transition checklist-cell text-xs font-bold
+                        {% if status == 'P' %}bg-green-50 text-green-700
+                        {% elif status == 'L' %}bg-yellow-50 text-yellow-700
+                        {% elif status == 'A' %}bg-red-50 text-red-700
+                        {% elif status == 'E' %}bg-blue-50 text-blue-700
+                        {% else %}text-gray-200{% endif %}"
+                        data-enrollment-id="{{ row.enrollment.id }}"
+                        data-day="{{ forloop.counter }}"
+                        data-current="{{ status }}">
+                        {{ status|default:"·" }}
+                    </td>
+                    {% endfor %}
+                    
+                    <td class="p-1 border text-xs font-bold text-green-700 bg-green-50">{{ row.present_count }}</td>
+                    <td class="p-1 border text-xs font-bold text-yellow-600 bg-yellow-50">{{ row.late_count }}</td>
+                    <td class="p-1 border text-xs font-bold text-red-600 bg-red-50">{{ row.absent_count }}</td>
+                    <td class="p-1 border text-xs font-bold text-blue-600 bg-blue-50">{{ row.leave_count }}</td>
+                    <td class="p-1 border text-xs font-bold bg-blue-50">{{ row.effective_hours }}/{{ row.total_hours }}</td>
+                    <td class="p-1 border text-xs font-black bg-green-50 text-green-800">{{ row.attendance_score }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="40" class="p-8 text-center text-gray-400">
+                        <i class="fas fa-user-graduate text-4xl mb-3 block"></i>
+                        ❌ ບໍ່ພົບນັກຮຽນ — ກະລຸນາເລືອກຫ້ອງຮຽນ ຫຼື ປ້ອນຂໍ້ມູນຄົ້ນຫາ
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Single Cell Edit Modal -->
+<div id="checklistModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-xs w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-clipboard-check text-blue-600"></i> ໝາຍຊື່
+            </h3>
+            <button id="closeModalIcon" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <p class="text-sm font-medium text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-5 text-center" id="modalDesc"></p>
+        
+        <input type="hidden" id="modalEnrollmentId">
+        <input type="hidden" id="modalYear">
+        <input type="hidden" id="modalMonth">
+        <input type="hidden" id="modalDay">
+
+        <div class="grid grid-cols-2 gap-3 mb-5">
+            <button type="button" class="status-btn p-3 rounded-xl border-2 font-bold text-center transition-all hover:scale-105 border-green-300 bg-green-50 text-green-700 hover:bg-green-200" data-status="P">
+                ✅ P<br><span class="text-[10px] font-normal">ມາ</span>
+            </button>
+            <button type="button" class="status-btn p-3 rounded-xl border-2 font-bold text-center transition-all hover:scale-105 border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-200" data-status="L">
+                ⏰ L<br><span class="text-[10px] font-normal">ສາຍ</span>
+            </button>
+            <button type="button" class="status-btn p-3 rounded-xl border-2 font-bold text-center transition-all hover:scale-105 border-red-300 bg-red-50 text-red-700 hover:bg-red-200" data-status="A">
+                ❌ A<br><span class="text-[10px] font-normal">ຂາດ</span>
+            </button>
+            <button type="button" class="status-btn p-3 rounded-xl border-2 font-bold text-center transition-all hover:scale-105 border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-200" data-status="E">
+                📝 E<br><span class="text-[10px] font-normal">ລາ</span>
+            </button>
+        </div>
+        
+        <button type="button" id="clearStatusBtn" class="w-full p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 text-sm font-medium mb-3">
+            <i class="fas fa-eraser mr-1"></i> ລຶບ (ປະຫວ່າງ)
+        </button>
+        
+        <button id="closeModalBtn" class="w-full p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-semibold">
+            ຍົກເລີກ
+        </button>
+    </div>
+</div>
+
+<!-- Batch Edit Modal -->
+<div id="batchModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full mx-4 my-8">
+        <div class="flex justify-between items-center mb-4 border-b pb-3">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-calendar-alt text-blue-600"></i> ໝາຍຊື່ທັງເດືອນ: <span id="batchModalName" class="text-blue-700"></span>
+            </h3>
+            <button id="closeBatchIcon" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <p class="text-sm font-medium text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100 mb-5" id="batchModalDesc"></p>
+        
+        <input type="hidden" id="batchEnrollmentId">
+        <input type="hidden" id="batchYear">
+        <input type="hidden" id="batchMonth">
+        
+        <div class="grid grid-cols-4 md:grid-cols-7 gap-3 mb-6" id="batchDaysContainer">
+        </div>
+        
+        <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
+            <button id="closeBatchBtn" class="w-full sm:w-auto px-5 py-2.5 bg-white border-2 border-gray-200 font-semibold rounded-lg text-gray-700 hover:bg-gray-50 transition-all">ຍົກເລີກ</button>
+            <button id="saveBatchBtn" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 font-semibold text-white rounded-lg hover:bg-blue-700 transition-all flex justify-center items-center gap-2">
+                <i class="fas fa-save"></i> ບັນທຶກທັງໝົດ
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const year = "{{ year }}";
+    const month = "{{ month }}";
+    
+    // ===== SINGLE CELL EDIT =====
+    const cells = document.querySelectorAll('.checklist-cell');
+    const modal = document.getElementById('checklistModal');
+    const modalDesc = document.getElementById('modalDesc');
+    const statusBtns = document.querySelectorAll('.status-btn');
+    const clearBtn = document.getElementById('clearStatusBtn');
+    let currentCell = null;
+    
+    function openModal(enrollmentId, day, currentStatus, cell) {
+        currentCell = cell;
+        document.getElementById('modalEnrollmentId').value = enrollmentId;
+        document.getElementById('modalYear').value = year;
+        document.getElementById('modalMonth').value = month;
+        document.getElementById('modalDay').value = day;
+        
+        const row = cell.closest('tr');
+        const studentName = row.querySelector('td:nth-child(2) a').innerText;
+        modalDesc.innerHTML = `<span class="block text-xs text-gray-500 mb-1">ວັນທີ ${day}/${month}/${year}</span><span class="font-bold text-gray-800">${studentName}</span>`;
+        
+        // Highlight current status
+        statusBtns.forEach(btn => {
+            btn.classList.remove('ring-4', 'ring-offset-2');
+            if (btn.dataset.status === currentStatus) {
+                btn.classList.add('ring-4', 'ring-offset-2');
+            }
+        });
+        
+        modal.classList.remove('hidden');
+    }
+    
+    function closeModal() {
+        modal.classList.add('hidden');
+        currentCell = null;
+    }
+    
+    function saveStatus(status) {
+        const enrollmentId = document.getElementById('modalEnrollmentId').value;
+        const day = document.getElementById('modalDay').value;
+        
+        fetch("{% url 'backoffice:update-checklist' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ enrollment_id: enrollmentId, year, month, day, status })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert("ເກີດຂໍ້ຜິດພາດ: " + data.message);
+            }
+        })
+        .catch(() => alert("ລະບົບຕອບສະໜອງຜິດພາດ."));
+    }
+    
+    cells.forEach(cell => {
+        cell.addEventListener('click', function() {
+            openModal(
+                this.dataset.enrollmentId, 
+                this.dataset.day, 
+                this.dataset.current, 
+                this
+            );
+        });
+    });
+    
+    statusBtns.forEach(btn => {
+        btn.addEventListener('click', function() { saveStatus(this.dataset.status); });
+    });
+    
+    clearBtn.addEventListener('click', () => saveStatus(''));
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('closeModalIcon').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+    
+    // ===== BATCH EDIT (Click on student name) =====
+    const batchModal = document.getElementById('batchModal');
+    
+    function closeBatchModal() { batchModal.classList.add('hidden'); }
+    
+    document.getElementById('closeBatchBtn').addEventListener('click', closeBatchModal);
+    document.getElementById('closeBatchIcon').addEventListener('click', closeBatchModal);
+    batchModal.addEventListener('click', e => { if (e.target === batchModal) closeBatchModal(); });
+    
+    document.querySelectorAll('.student-name-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const row = this.closest('tr');
+            const dayCells = row.querySelectorAll('.checklist-cell');
+            const enrollmentId = this.dataset.enrollmentId;
+            const studentName = this.dataset.studentName;
+            const numDays = {{ days_range|length }};
+            
+            document.getElementById('batchEnrollmentId').value = enrollmentId;
+            document.getElementById('batchYear').value = year;
+            document.getElementById('batchMonth').value = month;
+            document.getElementById('batchModalName').innerText = studentName;
+            document.getElementById('batchModalDesc').innerHTML = `<i class="fas fa-calendar"></i> ເດືອນ: <b>${month}/${year}</b> <span class="ml-2 text-xs text-blue-500">(ເລືອກ P/L/A/E ສຳລັບແຕ່ລະວັນ)</span>`;
+            
+            const container = document.getElementById('batchDaysContainer');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= numDays; i++) {
+                const currentVal = dayCells[i-1] ? dayCells[i-1].dataset.current : '';
+                container.innerHTML += `
+                    <div class="flex flex-col bg-gray-50 border border-gray-200 rounded-lg p-2">
+                        <label class="text-xs font-bold text-gray-500 mb-1 text-center">ວັນ ${i}</label>
+                        <select class="batch-day-select w-full border border-gray-300 rounded px-1 py-2 text-center text-sm font-bold focus:ring-2 focus:ring-blue-400 focus:outline-none
+                            ${currentVal === 'P' ? 'bg-green-50 text-green-700' : currentVal === 'L' ? 'bg-yellow-50 text-yellow-700' : currentVal === 'A' ? 'bg-red-50 text-red-700' : currentVal === 'E' ? 'bg-blue-50 text-blue-700' : 'text-gray-400'}"
+                            data-day="${i}">
+                            <option value="" ${!currentVal ? 'selected' : ''}>-</option>
+                            <option value="P" ${currentVal === 'P' ? 'selected' : ''}>P</option>
+                            <option value="L" ${currentVal === 'L' ? 'selected' : ''}>L</option>
+                            <option value="A" ${currentVal === 'A' ? 'selected' : ''}>A</option>
+                            <option value="E" ${currentVal === 'E' ? 'selected' : ''}>E</option>
+                        </select>
+                    </div>
+                `;
+            }
+            
+            // Add change event styling
+            setTimeout(() => {
+                document.querySelectorAll('.batch-day-select').forEach(sel => {
+                    sel.addEventListener('change', function() {
+                        this.className = this.className.replace(/bg-\w+-50|text-\w+-\d+/g, '');
+                        const v = this.value;
+                        if (v === 'P') this.classList.add('bg-green-50', 'text-green-700');
+                        else if (v === 'L') this.classList.add('bg-yellow-50', 'text-yellow-700');
+                        else if (v === 'A') this.classList.add('bg-red-50', 'text-red-700');
+                        else if (v === 'E') this.classList.add('bg-blue-50', 'text-blue-700');
+                        else this.classList.add('text-gray-400');
+                    });
+                });
+            }, 50);
+            
+            batchModal.classList.remove('hidden');
+        });
+    });
+    
+    // Batch save
+    document.getElementById('saveBatchBtn').addEventListener('click', function() {
+        const enrollmentId = document.getElementById('batchEnrollmentId').value;
+        const updates = [];
+        document.querySelectorAll('.batch-day-select').forEach(sel => {
+            updates.push({ day: sel.dataset.day, status: sel.value });
+        });
+        
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ກຳລັງບັນທຶກ...';
+        
+        fetch("{% url 'backoffice:batch-update-checklist' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify({ enrollment_id: enrollmentId, year, month, updates })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert("ເກີດຂໍ້ຜິດພາດ: " + data.message);
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-save"></i> ບັນທຶກທັງໝົດ';
+            }
+        })
+        .catch(() => {
+            alert("ລະບົບຕອບສະໜອງຜິດພາດ.");
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-save"></i> ບັນທຶກທັງໝົດ';
+        });
+    });
+});
+</script>
+{% endblock %}

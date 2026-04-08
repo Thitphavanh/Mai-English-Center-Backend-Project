@@ -114,12 +114,22 @@
                        data-max="30" data-field="engagement" placeholder="0">
               </td>
 
-              <!-- ATTENDANCE /20 -->
+              <!-- ATTENDANCE /20 (Auto-calculated from Checklist) -->
               <td class="px-2 py-2 text-center">
-                <input type="number" name="attendance_{{ row.enrollment.pk }}"
-                       value="{{ row.attendance }}" min="0" max="20" step="0.5"
-                       class="score-input w-14 text-center border border-slate-200 rounded-lg py-1.5 px-1 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400"
-                       data-max="20" data-field="attendance" placeholder="0">
+                <div class="relative">
+                  <input type="number" name="attendance_{{ row.enrollment.pk }}"
+                         value="{{ row.attendance }}" min="0" max="20" step="0.01"
+                         class="score-input w-14 text-center border rounded-lg py-1.5 px-1 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400
+                         {% if row.attendance_auto %}border-amber-400 bg-amber-50 text-amber-700{% else %}border-slate-200{% endif %}"
+                         data-max="20" data-field="attendance" placeholder="0"
+                         {% if row.attendance_auto %}readonly title="ອັດຕະໂນມັດຈາກ Checklist: P={{ row.checklist_present }} L={{ row.checklist_late }} A={{ row.checklist_absent }}"{% endif %}>
+                  {% if row.attendance_auto %}
+                  <span class="absolute -top-2 -right-2 w-4 h-4 bg-amber-500 text-white rounded-full text-[8px] flex items-center justify-center font-bold" title="ຄິດໄລ່ອັດຕະໂນມັດຈາກ Checklist (P:{{ row.checklist_present }} L:{{ row.checklist_late }} A:{{ row.checklist_absent }})">⚡</span>
+                  {% endif %}
+                </div>
+                {% if row.attendance_auto %}
+                <p class="text-[9px] text-amber-600 mt-0.5">P:{{ row.checklist_present }} L:{{ row.checklist_late }} A:{{ row.checklist_absent }}</p>
+                {% endif %}
               </td>
 
               <!-- QUIZ /30 -->

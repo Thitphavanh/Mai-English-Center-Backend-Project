@@ -8,8 +8,14 @@ User = get_user_model()
 
 class Course(models.Model):
     """ Model to store Course / Book information (e.g., FRIMER BOOK 1) """
+    class ClassType(models.TextChoices):
+        WEEKDAY = 'WD', 'Weekday (ຈັນ-ພະຫັດ)'
+        WEEKEND = 'WN', 'Weekend (ເສົາ-ອາທິດ)'
+
     name = models.CharField(max_length=150, help_text="Course Name e.g., CLASS A FRIMER")
     book_name = models.CharField(max_length=150, help_text="e.g., BOOK 1", blank=True, null=True)
+    class_type = models.CharField(max_length=2, choices=ClassType.choices, default=ClassType.WEEKDAY)
+    teaching_days = models.CharField(max_length=100, default="Mon-Thu", help_text="e.g., Mon-Thu or Sat-Sun")
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -24,7 +30,8 @@ class ClassSchedule(models.Model):
     """ Model to represent a specific class schedule (e.g., TIME 05:30 - 06:30 PM) """
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
     teacher = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='teaching_classes')
-    time_slot = models.CharField(max_length=100, help_text="e.g., 05:30 - 06:30 PM")
+    time_slot = models.CharField(max_length=100, help_text="e.g., 05:30 - 06:30 PM or 10:00 - 12:00 AM")
+    total_hours_per_month = models.IntegerField(default=16, help_text="Standard hours (16 or 17 based on month)")
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -319,15 +326,55 @@ class MonthlyScore(models.Model):
         ordering = ['-month', 'enrollment__student__full_name']
 
     def save(self, *args, **kwargs):
-        # Auto-calculate activities total
+        # 1. Auto-calculate Attendance from DailyChecklist if not manually entered
+        try:
+            # Parse 'MM/YYYY' into integers
+            m, y = self.month.split('/')
+            month_int = int(m)
+            year_int = int(y)
+            
+            # Fetch all checklist records for this student in this specific month
+            checklists = self.enrollment.daily_records.filter(
+                date__month=month_int, 
+                date__year=year_int
+            )
+            
+            # If records exist, calculate the attendance score automatically
+            if checklists.exists():
+                # Check course type to determine hours per session 
+                # (Weekday = 1 hour/day, Weekend = 2 hours/day)
+                course_type = self.enrollment.class_schedule.course.class_type
+                hours_per_session = 2 if course_type == 'WN' else 1
+                
+                attended_hours = 0
+                for chk in checklists:
+                    if chk.status == 'P': # Present
+                        attended_hours += hours_per_session
+                    elif chk.status == 'L': # Late (gets half hour)
+                        attended_hours += (hours_per_session * 0.5)
+                        
+                expected_hours = self.enrollment.class_schedule.total_hours_per_month
+                
+                if expected_hours > 0:
+                    calc_attendance = (attended_hours / float(expected_hours)) * 20
+                    # Cap at 20 points
+                    if calc_attendance > 20:
+                        calc_attendance = 20
+                        
+                    self.attendance = round(calc_attendance, 2)
+        except Exception as e:
+            # If any parsing issue occurs (e.g. invalid date formats), just skip auto-calc
+            pass
+
+        # 2. Auto-calculate activities total
         act = sum(float(x) for x in [self.exercise, self.attendance, self.engagement] if x is not None)
         self.activities_total = act if act > 0 else None
 
-        # Auto-calculate total score
+        # 3. Auto-calculate total score
         test = float(self.monthly_test) if self.monthly_test is not None else 0
         self.total_score = round(act + test, 2)
 
-        # Auto-assign letter grade
+        # 4. Auto-assign letter grade
         self.letter_grade = compute_letter_grade(self.total_score)
 
         super().save(*args, **kwargs)

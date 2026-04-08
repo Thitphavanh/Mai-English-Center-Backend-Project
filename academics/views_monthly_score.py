@@ -143,14 +143,75 @@ class MonthlyScoreBulkEntryView(StaffRequiredMixin, View):
                     month=month_str
                 )
             }
+            
+            # Auto-calculate attendance from DailyChecklist
+            from academics.models import DailyChecklist
+            try:
+                m_part, y_part = month_str.split('/')
+                month_int = int(m_part)
+                year_int = int(y_part)
+            except:
+                month_int, year_int = today.month, today.year
+            
+            # Pre-fetch all checklist records for this schedule + month
+            all_checklists = DailyChecklist.objects.filter(
+                enrollment__class_schedule=selected_schedule,
+                date__month=month_int,
+                date__year=year_int
+            )
+            # Build lookup: {enrollment_id: [list of records]}
+            checklist_map = {}
+            for chk in all_checklists:
+                checklist_map.setdefault(chk.enrollment_id, []).append(chk)
+            
             for enr in enrollments:
                 score_obj = existing_scores.get(enr.pk)
+                
+                # Calculate attendance from DailyChecklist
+                chk_records = checklist_map.get(enr.pk, [])
+                calc_attendance = None
+                checklist_present = 0
+                checklist_late = 0
+                checklist_absent = 0
+                checklist_total = len(chk_records)
+                
+                if chk_records:
+                    course_type = selected_schedule.course.class_type
+                    hours_per_session = 2 if course_type == 'WN' else 1
+                    
+                    attended_hours = 0
+                    for chk in chk_records:
+                        if chk.status == 'P':
+                            attended_hours += hours_per_session
+                            checklist_present += 1
+                        elif chk.status == 'L':
+                            attended_hours += (hours_per_session * 0.5)
+                            checklist_late += 1
+                        elif chk.status == 'A':
+                            checklist_absent += 1
+                    
+                    expected_hours = selected_schedule.total_hours_per_month
+                    if expected_hours > 0:
+                        calc_attendance = round((attended_hours / float(expected_hours)) * 20, 2)
+                        if calc_attendance > 20:
+                            calc_attendance = 20.0
+                
+                # Use calculated attendance if available, otherwise use existing score
+                display_attendance = calc_attendance
+                if display_attendance is None and score_obj:
+                    display_attendance = score_obj.attendance
+                
                 rows.append({
                     'enrollment': enr,
                     'score': score_obj,
                     'monthly_test': score_obj.monthly_test if score_obj else '',
                     'exercise': score_obj.exercise if score_obj else '',
-                    'attendance': score_obj.attendance if score_obj else '',
+                    'attendance': display_attendance if display_attendance is not None else '',
+                    'attendance_auto': calc_attendance is not None,
+                    'checklist_present': checklist_present,
+                    'checklist_late': checklist_late,
+                    'checklist_absent': checklist_absent,
+                    'checklist_total': checklist_total,
                     'engagement': score_obj.engagement if score_obj else '',
                     'remark': score_obj.remark if score_obj else '',
                     'letter_grade': score_obj.letter_grade if score_obj else '',

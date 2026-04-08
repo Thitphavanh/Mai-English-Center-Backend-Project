@@ -17,7 +17,30 @@ def test_message(request):
     })
 
 def index(request):
-    return render(request, 'index.html')
+    from academics.models import Course
+    courses = Course.objects.all()
+    return render(request, 'index.html', {'courses': courses})
+
+def course_list(request):
+    from academics.models import Course
+    from django.core.paginator import Paginator
+    
+    courses_query = Course.objects.all().order_by('-id')
+    paginator = Paginator(courses_query, 12) # 12 courses per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'home/course_list.html', {
+        'courses': page_obj, 
+        'page_obj': page_obj,
+        'total_courses': paginator.count
+    })
+
+def course_detail(request, course_id):
+    from academics.models import Course
+    from django.shortcuts import get_object_or_404
+    course = get_object_or_404(Course, id=course_id)
+    return render(request, 'home/course_detail.html', {'course': course})
 
 def check_enrollment(request):
     query = request.GET.get('q', '')
@@ -308,7 +331,7 @@ def learning_assessment(request):
     teachers = User.objects.filter(is_staff=True)
     classes = ClassSchedule.objects.select_related('course').all()
     # Prefetch monthly_scores to get the latest one for auto-pull
-    enrollments = Enrollment.objects.select_related('student', 'class_schedule').prefetch_related('monthly_scores').all()
+    enrollments = Enrollment.objects.select_related('student', 'class_schedule', 'class_schedule__course').prefetch_related('monthly_scores').all()
 
     classes_data = [
         {
@@ -319,9 +342,26 @@ def learning_assessment(request):
     ]
 
     enrollments_data = []
+    
+    # Pre-calculate attendance from DailyChecklist for each enrollment
+    import datetime
+    from academics.models import DailyChecklist
+    today = datetime.date.today()
+    current_month = today.month
+    current_year = today.year
+    
+    # Pre-fetch all checklist records for the current month
+    all_checklists = DailyChecklist.objects.filter(
+        date__month=current_month,
+        date__year=current_year,
+    )
+    checklist_map = {}
+    for chk in all_checklists:
+        checklist_map.setdefault(chk.enrollment_id, []).append(chk)
+    
     for e in enrollments:
         # Try to find the most recent monthly score
-        latest_score_obj = e.monthly_scores.order_by('-id').first() # ID order as a proxy for recency if month sorting is tricky
+        latest_score_obj = e.monthly_scores.order_by('-id').first()
         score_data = None
         if latest_score_obj:
             score_data = {
@@ -330,6 +370,43 @@ def learning_assessment(request):
                 'quiz': float(latest_score_obj.monthly_test) if latest_score_obj.monthly_test is not None else 0,
                 'exercise': float(latest_score_obj.exercise) if latest_score_obj.exercise is not None else 0,
             }
+        
+        # Auto-calculate attendance from DailyChecklist
+        chk_records = checklist_map.get(e.id, [])
+        calc_attendance = None
+        if chk_records:
+            course_type = e.class_schedule.course.class_type
+            hours_per_session = 2 if course_type == 'WN' else 1
+            
+            attended_hours = 0
+            for chk in chk_records:
+                if chk.status == 'P':
+                    attended_hours += hours_per_session
+                elif chk.status == 'L':
+                    attended_hours += (hours_per_session * 0.5)
+            
+            expected_hours = e.class_schedule.total_hours_per_month
+            if expected_hours > 0:
+                calc_attendance = round((attended_hours / float(expected_hours)) * 20, 2)
+                if calc_attendance > 20:
+                    calc_attendance = 20.0
+        
+        # If we have auto-calculated attendance, override the score_data
+        if calc_attendance is not None:
+            if score_data:
+                score_data['attendance'] = calc_attendance
+            else:
+                score_data = {
+                    'activity': 0,
+                    'attendance': calc_attendance,
+                    'quiz': 0,
+                    'exercise': 0,
+                }
+
+        # Count P/L/A for display
+        present_count = sum(1 for c in chk_records if c.status == 'P')
+        late_count = sum(1 for c in chk_records if c.status == 'L')
+        absent_count = sum(1 for c in chk_records if c.status == 'A')
 
         enrollments_data.append({
             'id': e.id,
@@ -337,7 +414,12 @@ def learning_assessment(request):
             'student_nick': e.student.nick_name or '',
             'student_id_code': e.student.student_id or "",
             'class_id': e.class_schedule_id,
+            'class_name': f"{e.class_schedule.course.name} — {e.class_schedule.time_slot}",
             'latest_score': score_data,
+            'attendance_auto': calc_attendance is not None,
+            'checklist_p': present_count,
+            'checklist_l': late_count,
+            'checklist_a': absent_count,
         })
 
     context = {
