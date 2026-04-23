@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select System | MAI Back Office</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 flex flex-col items-center justify-center min-h-screen font-sans p-4">
+    
+    <div class="w-full max-w-5xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-10">
+            <div class="flex items-center gap-4">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-600/20 text-blue-500">
+                    <i class="fas fa-shield-alt text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white tracking-tight">MAI Back Office</h1>
+                    <p class="text-gray-400 text-sm">Welcome, {{ user.first_name|default:user.username }}</p>
+                </div>
+            </div>
+            <a href="{% url 'backoffice:logout' %}" class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg border border-red-500/20 transition flex items-center gap-2 text-sm font-medium">
+                <i class="fas fa-sign-out-alt"></i> ອອກຈາກລະບົບ (Logout)
+            </a>
+        </div>
+
+        <div class="flex items-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-200 tracking-tight">ກະລຸນາເລືອກລະບົບ (Please Select System)</h2>
+            <div class="flex-grow ml-6 h-px bg-gray-700"></div>
+        </div>
+        
+        <!-- System Selection Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Morning System -->
+            <a href="{% url 'backoffice:dashboard' %}?system=morning" class="relative overflow-hidden group rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 border border-indigo-400/30">
+                <!-- decorative circles -->
+                <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 delay-100"></div>
+                
+                <div class="relative p-12 flex flex-col items-center justify-center text-center h-full">
+                    <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-8 shadow-inner group-hover:bg-white/30 transition-colors">
+                        <i class="fas fa-sun text-5xl text-yellow-300"></i>
+                    </div>
+                    <h3 class="text-5xl font-black text-white mb-4 tracking-wide drop-shadow-md">ສາມັນ <span class="text-3xl font-bold text-blue-200 block mt-2">(ພາກເຊົ້າ)</span></h3>
+                    <p class="text-indigo-100 font-medium text-xl uppercase tracking-widest opacity-90 mt-2">Morning Session</p>
+                    
+                    <div class="mt-10 px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white font-semibold transition-all flex items-center gap-3">
+                        ເຂົ້າສູ່ລະບົບ <i class="fas fa-arrow-right text-sm group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Evening System -->
+            <a href="{% url 'backoffice:dashboard' %}?system=evening" class="relative overflow-hidden group rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-purple-600 via-fuchsia-600 to-pink-700 border border-pink-400/30">
+                <!-- decorative circles -->
+                <div class="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700 delay-100"></div>
+                
+                <div class="relative p-12 flex flex-col items-center justify-center text-center h-full">
+                    <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mb-8 shadow-inner group-hover:bg-white/30 transition-colors">
+                        <i class="fas fa-moon text-5xl text-amber-200"></i>
+                    </div>
+                    <h3 class="text-5xl font-black text-white mb-4 tracking-wide drop-shadow-md">ພາກຄ່ຳ <span class="text-3xl font-bold text-pink-200 block mt-2">(Evening)</span></h3>
+                    <p class="text-pink-100 font-medium text-xl uppercase tracking-widest opacity-90 mt-2">Evening Session</p>
+                    
+                    <div class="mt-10 px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-white font-semibold transition-all flex items-center gap-3">
+                        ເຂົ້າສູ່ລະບົບ <i class="fas fa-arrow-right text-sm group-hover:translate-x-2 transition-transform"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Footer info -->
+        <div class="mt-16 text-center text-gray-500 text-sm">
+            <p>&copy; 2026 MAI English Center. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

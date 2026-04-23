@@ -1,20 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from academics.models import Student
 from django.db.models import Q
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def test_message(request):
-    image_url = request.build_absolute_uri('/static/images/new-logo.jpg')
-    return Response({
-        "message": "Hello Mai English Center",
-        "image_url": image_url
-    })
 
 def index(request):
     from academics.models import Course
@@ -36,10 +24,10 @@ def course_list(request):
         'total_courses': paginator.count
     })
 
-def course_detail(request, course_id):
+def course_detail(request, slug):
     from academics.models import Course
     from django.shortcuts import get_object_or_404
-    course = get_object_or_404(Course, id=course_id)
+    course = get_object_or_404(Course, slug=slug)
     return render(request, 'home/course_detail.html', {'course': course})
 
 def check_enrollment(request):

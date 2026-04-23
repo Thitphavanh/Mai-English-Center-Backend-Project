@@ -22,7 +22,7 @@ from django.contrib.auth import authenticate, login, logout
 
 def backoffice_login(request):
     if request.user.is_authenticated and request.user.is_staff:
-        return redirect('backoffice:dashboard')
+        return redirect('backoffice:system-selection')
     error = None
     if request.method == "POST":
         u = request.POST.get('username')
@@ -31,7 +31,7 @@ def backoffice_login(request):
         if user is not None:
             if user.is_staff:
                 login(request, user)
-                return redirect('backoffice:dashboard')
+                return redirect('backoffice:system-selection')
             else:
                 error = "ບັນຊີນີ້ບໍ່ມີສິດເຂົ້າເຖິງລະບົບຫຼັງບ້ານ (Not a Staff account)."
         else:
@@ -40,7 +40,7 @@ def backoffice_login(request):
 
 def backoffice_register(request):
     if request.user.is_authenticated and request.user.is_staff:
-        return redirect('backoffice:dashboard')
+        return redirect('backoffice:system-selection')
     error = None
     if request.method == "POST":
         u = request.POST.get('username')
@@ -51,12 +51,15 @@ def backoffice_register(request):
         else:
             user = User.objects.create_user(username=u, password=p, first_name=fn, is_staff=True)
             login(request, user)
-            return redirect('backoffice:dashboard')
+            return redirect('backoffice:system-selection')
     return render(request, 'backoffice/register.html', {'error': error})
 
 def backoffice_logout(request):
     logout(request)
     return redirect('backoffice:login')
+
+class SystemSelectionView(StaffRequiredMixin, TemplateView):
+    template_name = "backoffice/system_selection.html"
 
 class DashboardView(StaffRequiredMixin, TemplateView):
     template_name = "backoffice/dashboard.html"

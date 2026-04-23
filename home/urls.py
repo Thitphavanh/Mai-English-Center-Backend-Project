@@ -5,7 +5,6 @@ app_name = "home"
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("api/test-message/", views.test_message, name="test-message"),
     path("check-enrollment/", views.check_enrollment, name="check_enrollment"),
     path("class-rosters/", views.class_rosters, name="class_rosters"),
     path("student/<str:student_id>/", views.student_detail, name="student_detail"),
@@ -18,7 +17,7 @@ urlpatterns = [
     
     # ໜ້າຫຼັກສູດທັງໝົດ
     path("courses/", views.course_list, name="course_list"),
-    path("courses/<int:course_id>/", views.course_detail, name="course_detail"),
+    path("courses/<slug:slug>/", views.course_detail, name="course_detail"),
     
     # ໜ້າປະເມີນຜົນການຮຽນຮູ້ (Learning Assessment)
     path("assessment/", views.learning_assessment, name="learning_assessment"),

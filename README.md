@@ -7,45 +7,55 @@
 ## 1. ການຕັ້ງຄ່າ Server ເບື້ອງຕົ້ນ (Initial Server Setup)
 
 ລັອກອິນເຂົ້າເຊີບເວີດ້ວຍ user root:
+
 ```bash
 ssh root@167.172.81.xxx
 ```
 
 ອັບເດດລະບົບໃຫ້ເປັນປັດຈຸບັນ:
+
 ```bash
 sudo apt-get update && sudo apt-get upgrade -y
 ```
 
 ຕັ້ງຊື່ Hostname (ຊື່ເຄື່ອງ):
+
 ```bash
 sudo hostnamectl set-hostname mai_centre
 sudo hostname
 ```
 
 ແກ້ໄຂໄຟລ໌ `/etc/hosts`:
+
 ```bash
 sudo nano /etc/hosts
 ```
+
 ເພີ່ມແຖວນີ້ກ່ອນແຖວ `127.0.0.1`:
+
 ```text
 167.172.81.xxx mai_centre
 ```
+
 *(ກົດ `Ctrl+X` > `Y` > `Enter` ເພື່ອບັນທຶກ)*
 
 ## 2. ສ້າງ User ໃໝ່ (Create User)
 
 ສ້າງ user ຊື່ `mai` ສຳລັບຣັນໂປຣເຈັກ:
+
 ```bash
 sudo adduser mai
 # ປ້ອນລະຫັດຜ່ານ ແລະ ຂໍ້ມູນຕາມຂັ້ນຕອນ
 ```
 
 ເພີ່ມສິດ admin (sudo) ໃຫ້ກັບ user ໃໝ່:
+
 ```bash
 sudo adduser mai sudo
 ```
 
 ສະຫຼັບໄປໃຊ້ user ໃໝ່:
+
 ```bash
 su - mai
 ```
@@ -67,12 +77,14 @@ sudo ufw status
 ## 4. ຕິດຕັ້ງ Python ແລະ Virtual Environment
 
 ຕິດຕັ້ງ Python 3 ແລະ venv:
+
 ```bash
 sudo apt update
 sudo apt install python3-pip python3-venv -y
 ```
 
 ສ້າງ Virtual Environment:
+
 ```bash
 cd ~
 python3 -m venv venv
@@ -83,6 +95,7 @@ python3 -m venv venv
 ອັບໂຫຼດໄຟລ໌ໂປຣເຈັກ (ເນື້ອໃນທີ່ຢູ່ໃນ `backend/core/` ຂອງເຄື່ອງທ່ານ) ໄປໄວ້ທີ່ `/home/mai/mai-english-center`.
 
 **ໂຄງສ້າງໄຟລ໌ໃນເຊີບເວີຄວນເປັນດັ່ງນີ້:**
+
 ```bash
 /home/mai/
     venv/
@@ -96,6 +109,7 @@ python3 -m venv venv
 ```
 
 ຕັ້ງຄ່າເຈົ້າຂອງໄຟລ໌:
+
 ```bash
 sudo chown -R mai:mai /home/mai/mai-english-center
 ```
@@ -109,6 +123,7 @@ pip install -r /home/mai/mai-english-center/requirements.txt
 ```
 
 ກວດສອບ Django:
+
 ```bash
 cd ~/mai-english-center
 python manage.py check
@@ -117,18 +132,22 @@ python manage.py check
 ## 7. ຕັ້ງຄ່າ Django (Django Configuration)
 
 ແກ້ໄຂໄຟລ໌ `core/settings/prod.py` (ຫຼື settings ທີ່ທ່ານໃຊ້):
+
 - ຕັ້ງຄ່າ `ALLOWED_HOSTS = ['167.172.81.xxx', 'mai_centre']`
 - ຕັ້ງຄ່າ `STATIC_ROOT = BASE_DIR / 'staticfiles'`
 
 ຮວບຮວມໄຟລ໌ Static:
+
 ```bash
 python manage.py collectstatic
 ```
 
 ທົດສອບຣັນ Server:
+
 ```bash
 python manage.py runserver 0.0.0.0:8000
 ```
+
 *(ເບິ່ງຜ່ານ Browser ທີ່ `http://167.172.81.xxx:8000` ແລ້ວກົດ `Ctrl+C` ເພື່ອປິດ)*
 
 ## 8. ຕິດຕັ້ງ Apache2 ແລະ mod_wsgi
@@ -139,11 +158,13 @@ sudo a2enmod wsgi
 ```
 
 ສ້າງໄຟລ໌ Config ສຳລັບ Apache:
+
 ```bash
 sudo nano /etc/apache2/sites-available/mai-english-center.conf
 ```
 
 **ວາງໂຄ້ດນີ້ລົງໄປ:**
+
 ```apache
 <VirtualHost *:80>
     ServerName 167.172.81.xxx
@@ -177,6 +198,7 @@ sudo nano /etc/apache2/sites-available/mai-english-center.conf
 ```
 
 ເປີດໃຊ້ Site:
+
 ```bash
 sudo a2ensite mai-english-center
 sudo a2dissite 000-default.conf
@@ -200,4 +222,5 @@ sudo ufw delete allow 8000
 ```
 
 ---
+
 **ໝາຍເຫດ:** ຖ້າມີຂໍ້ຜິດພາດ ສາມາດກວດເບິ່ງ Log ໄດ້ທີ່: `sudo tail -f /var/log/apache2/mai_error.log`

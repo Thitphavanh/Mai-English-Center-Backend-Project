@@ -14,6 +14,7 @@ class Course(models.Model):
 
     name = models.CharField(max_length=150, help_text="Course Name e.g., CLASS A FRIMER")
     book_name = models.CharField(max_length=150, help_text="e.g., BOOK 1", blank=True, null=True)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     class_type = models.CharField(max_length=2, choices=ClassType.choices, default=ClassType.WEEKDAY)
     teaching_days = models.CharField(max_length=100, default="Mon-Thu", help_text="e.g., Mon-Thu or Sat-Sun")
     description = models.TextField(blank=True, null=True)
@@ -22,6 +23,18 @@ class Course(models.Model):
     class Meta:
         verbose_name = "Course (ຫຼັກສູດ/ປຶ້ມ)"
         verbose_name_plural = "Courses (ລາຍການຫຼັກສູດ)"
+
+    def save(self, *args, **kwargs):
+        from django.utils.text import slugify
+        if not self.slug:
+            base_slug = slugify(f"{self.name} {self.book_name or ''}")
+            slug = base_slug
+            counter = 1
+            while Course.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} - {self.book_name}"
@@ -87,6 +100,14 @@ class Enrollment(models.Model):
     def __str__(self):
         return f"{self.student.full_name} -> {self.class_schedule}"
 
+    @property
+    def get_latest_evaluation(self):
+        """Returns the newest Assessment or MonthlyScore"""
+        asm = self.assessments.all().first()
+        if asm:
+            return asm
+        return self.monthly_scores.all().first()
+
 class DailyChecklist(models.Model):
     """ 
     Model to track the 1-31 days columns from the Excel sheet. 
@@ -148,6 +169,7 @@ class Assessment(models.Model):
     class Meta:
         verbose_name = "Assessment (ການປະເມີນຜົນ)"
         verbose_name_plural = "Assessments (ແບບປະເມີນຜົນການຮຽນ)"
+        ordering = ['-evaluation_date', '-id']
 
     def save(self, *args, **kwargs):
         parts = [self.score_activity, self.score_attendance, self.score_quiz, self.score_exercise]
@@ -221,6 +243,7 @@ class TuitionFee(models.Model):
     class Meta:
         verbose_name = "Tuition Fee (ຄ່າຮຽນ)"
         verbose_name_plural = "Tuition Fees (ບັນທຶກສະຖານະຈ່າຍຄ່າຮຽນ)"
+        ordering = ['-month', '-id']
 
     def __str__(self):
         return f"{self.enrollment.student} - {self.month} - {self.get_status_display()}"

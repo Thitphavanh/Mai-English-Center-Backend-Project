@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "integrations",
     "users",
     "backoffice",
+    "api",
 ]
 
 MIDDLEWARE = [

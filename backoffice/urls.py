@@ -20,7 +20,8 @@ urlpatterns = [
     path('login/', views.backoffice_login, name='login'),
     path('register/', views.backoffice_register, name='register'),
     path('logout/', views.backoffice_logout, name='logout'),
-    path('', views.DashboardView.as_view(), name='dashboard'),
+    path('', views.SystemSelectionView.as_view(), name='system-selection'),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
 ]
 
 # ACADEMICS
