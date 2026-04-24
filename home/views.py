@@ -6,8 +6,20 @@ from django.db.models import Q
 
 def index(request):
     from academics.models import Course
+    from .models import Announcement, NewsActivity, SchoolHistory, OrgChart
     courses = Course.objects.all()
-    return render(request, 'index.html', {'courses': courses})
+    announcements = Announcement.objects.filter(is_active=True).order_by('-date')[:5]
+    news = NewsActivity.objects.all().order_by('-date')[:6]
+    history = SchoolHistory.objects.first()
+    org_chart = OrgChart.objects.first()
+    
+    return render(request, 'index.html', {
+        'courses': courses,
+        'announcements': announcements,
+        'news': news,
+        'history': history,
+        'org_chart': org_chart,
+    })
 
 def course_list(request):
     from academics.models import Course

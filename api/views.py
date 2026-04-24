@@ -79,7 +79,13 @@ def api_teacher_profile(request, teacher_id):
 @permission_classes([AllowAny])
 def api_home_data(request):
     from academics.models import Course
+    from home.models import Announcement, NewsActivity, SchoolHistory, OrgChart
+    
     courses = Course.objects.all().order_by('-id')[:6]
+    announcements = Announcement.objects.filter(is_active=True).order_by('-date')[:5]
+    news = NewsActivity.objects.all().order_by('-date')[:6]
+    history = SchoolHistory.objects.first()
+    org_chart = OrgChart.objects.first()
     
     # Hero Stats
     stats = [
@@ -96,7 +102,6 @@ def api_home_data(request):
         {"title": "ຫ້ອງຮຽນແອເຢັນທຸກຫ້ອງ", "desc": "ຫ້ອງຮຽນຕິດແອ A > B > C > D ໃຫ້ຜູ້ຮຽນມີຄວາມສະດວກສະບາຍ.", "icon": "ac_unit"},
     ]
     
-    # Course Serializer inside for simplicity or use existing
     course_list = []
     for c in courses:
         course_list.append({
@@ -107,6 +112,25 @@ def api_home_data(request):
             "description": c.description or "ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານ ແລະ ພັດທະນາທັກສະຟັງ ເວົ້າ ອ່ານ ຂຽນ.",
         })
 
+    announcement_list = []
+    for a in announcements:
+        announcement_list.append({
+            "id": a.id,
+            "title": a.title,
+            "content": a.content,
+            "date": a.date.strftime("%d %b %Y")
+        })
+
+    news_list = []
+    for n in news:
+        news_list.append({
+            "id": n.id,
+            "title": n.title,
+            "description": n.description,
+            "image": request.build_absolute_uri(n.image.url) if n.image else None,
+            "date": n.date.strftime("%d %b %Y")
+        })
+
     return Response({
         "success": True,
         "hero": {
@@ -115,5 +139,104 @@ def api_home_data(request):
             "stats": stats
         },
         "courses": course_list,
-        "features": features
+        "features": features,
+        "announcements": announcement_list,
+        "news": news_list,
+        "history": {
+            "title": history.title if history else "ປະຫວັດຂອງໂຮງຮຽນ",
+            "content": history.content if history else "...",
+            "image": request.build_absolute_uri(history.image.url) if history and history.image else None
+        },
+        "org_chart": request.build_absolute_uri(org_chart.image.url) if org_chart and org_chart.image else None
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_course_detail(request, slug):
+    from academics.models import Course
+    course = get_object_or_404(Course, slug=slug)
+    
+    return Response({
+        "success": True,
+        "course": {
+            "id": course.id,
+            "name": course.name,
+            "book_name": course.book_name,
+            "slug": course.slug,
+            "description": course.description or "ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ.",
+            "class_type_display": course.get_class_type_display(),
+            "teaching_days": course.teaching_days,
+            "created_at": course.created_at.strftime("%d %b %Y"),
+            "benefits": [
+                "ພັດທະນາທັກສະການອອກສຽງ (Pronunciation) ໃຫ້ຖືກຕ້ອງ.",
+                "ຮຽນຮູ້ຄຳສັບ ແລະ ໄວຍາກອນທີ່ຈຳເປັນໃນຊີວິດປະຈຳວັນ.",
+                "ສ້າງຄວາມໝັ້ນໃຈໃນການສື່ສານກັບຊາວຕ່າງຊາດ.",
+                "ສິ່ງອຳນວຍຄວາມສະດວກໃນການຮຽນທີ່ທັນສະໄໝ."
+            ],
+            "contact": {
+                "whatsapp": "+856 20 98 651 110",
+                "location": "ບ້ານໄຊຍະມຸງຄຸນ ນະຄອນໄກສອນ ແຂວງສະຫວັນນະເຂດ"
+            }
+        }
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def api_course_list(request):
+    from academics.models import Course
+    from django.core.paginator import Paginator
+    
+    courses_qs = Course.objects.all().order_by('-id')
+    paginator = Paginator(courses_qs, 10) # 10 items per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    course_list = []
+    for c in page_obj:
+        course_list.append({
+            "id": c.id,
+            "name": c.name,
+            "book_name": c.book_name,
+            "slug": c.slug,
+            "description": c.description or "ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ.",
+        })
+        
+    return Response({
+        "success": True,
+        "courses": course_list,
+        "has_next": page_obj.has_next(),
+        "total_pages": paginator.num_pages,
+        "current_page": page_obj.number
+    })
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_get_popups(request):
+    from communication.models import PopupMessage
+    from django.db.models import Q, Count
+    
+    # Get messages that are active AND (either for all users OR specifically for this user)
+    # We use Count to identify messages with 0 target users (send to all)
+    popups = PopupMessage.objects.filter(
+        is_active=True
+    ).annotate(
+        num_targets=Count('target_users')
+    ).filter(
+        Q(num_targets=0) | Q(target_users=request.user)
+    ).distinct().order_by('-created_at')
+    
+    popup_list = []
+    for p in popups:
+        popup_list.append({
+            "id": p.id,
+            "title": p.title,
+            "message": p.message,
+            "image": request.build_absolute_uri(p.image.url) if p.image else None,
+        })
+        
+    return Response({
+        "success": True,
+        "popups": popup_list
     })
