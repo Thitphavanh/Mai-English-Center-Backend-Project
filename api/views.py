@@ -110,6 +110,7 @@ def api_home_data(request):
             "book_name": c.book_name,
             "slug": c.slug,
             "description": c.description or "ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານ ແລະ ພັດທະນາທັກສະຟັງ ເວົ້າ ອ່ານ ຂຽນ.",
+            "image_url": request.build_absolute_uri(c.thumbnail.url) if c.thumbnail else None,
         })
 
     announcement_list = []
@@ -164,6 +165,7 @@ def api_course_detail(request, slug):
             "book_name": course.book_name,
             "slug": course.slug,
             "description": course.description or "ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ.",
+            "image_url": request.build_absolute_uri(course.thumbnail.url) if course.thumbnail else None,
             "class_type_display": course.get_class_type_display(),
             "teaching_days": course.teaching_days,
             "created_at": course.created_at.strftime("%d %b %Y"),
@@ -199,6 +201,7 @@ def api_course_list(request):
             "book_name": c.book_name,
             "slug": c.slug,
             "description": c.description or "ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ.",
+            "image_url": request.build_absolute_uri(c.thumbnail.url) if c.thumbnail else None,
         })
         
     return Response({

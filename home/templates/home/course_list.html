@@ -34,20 +34,34 @@
         {% if courses %}
         <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {% for course in courses %}
-            <div class="group bg-white p-6 rounded-[1.5rem] border border-slate-200 hover:border-brand/30 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden flex flex-col h-full">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-brand/5 to-purple-500/5 rounded-bl-[3rem] -mr-6 -mt-6 transition-transform group-hover:scale-150 duration-500 z-0"></div>
-                <div class="relative z-10 flex flex-col flex-grow">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-50 text-brand mb-4 shadow-sm border border-slate-100 group-hover:bg-brand group-hover:text-white transition-colors duration-300">
-                        <i class="fa-solid fa-book text-lg"></i>
-                    </div>
-                    <h3 class="text-xl font-black text-slate-800 mb-2">{{ course.name }}</h3>
-                    {% if course.book_name %}
-                    <div class="text-[10px] font-bold text-purple-600 bg-purple-50 inline-block px-3 py-1 rounded-full uppercase tracking-wider mb-3">{{ course.book_name }}</div>
+            <div class="group bg-white rounded-[1.5rem] border border-slate-200 hover:border-brand/30 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden flex flex-col h-full">
+                <!-- Course Image Container -->
+                <div class="relative h-48 overflow-hidden bg-slate-100">
+                    {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail.url }}" alt="{{ course.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-slate-300">
+                            <i class="fa-solid fa-book-open text-5xl"></i>
+                        </div>
                     {% endif %}
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
+                    <div class="absolute top-4 left-4">
+                        <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/90 backdrop-blur shadow-sm text-brand">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 relative z-10 flex flex-col flex-grow">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-brand/5 to-purple-500/5 rounded-bl-[3rem] -mr-6 -mt-6 transition-transform group-hover:scale-150 duration-500 z-0"></div>
+                    
+                    <h3 class="text-xl font-black text-slate-800 mb-2 relative z-10">{{ course.name }}</h3>
+                    {% if course.book_name %}
+                    <div class="text-[10px] font-bold text-purple-600 bg-purple-50 inline-block px-3 py-1 rounded-full uppercase tracking-wider mb-3 relative z-10">{{ course.book_name }}</div>
+                    {% endif %}
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6 flex-grow relative z-10">
                         {{ course.description|default:"ຫຼັກສູດມາດຕະຖານ ເນັ້ນປູພື້ນຖານການນຳໃຊ້ພາສາອັງກິດຢ່າງຖືກຕ້ອງ ແລະ ໝັ້ນໃຈ." }}
                     </p>
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto relative z-10">
                         <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full"><i class="fa-solid fa-tag mr-1"></i> Class</span>
                         <a href="{% url 'home:course_detail' course.slug %}" class="text-sm font-bold text-brand hover:text-brand-dark transition-colors inline-flex items-center">
                             ເບິ່ງລາຍລະອຽດ <i class="fa-solid fa-arrow-right ml-1"></i>

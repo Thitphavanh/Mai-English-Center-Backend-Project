@@ -18,6 +18,7 @@ class Course(models.Model):
     class_type = models.CharField(max_length=2, choices=ClassType.choices, default=ClassType.WEEKDAY)
     teaching_days = models.CharField(max_length=100, default="Mon-Thu", help_text="e.g., Mon-Thu or Sat-Sun")
     description = models.TextField(blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='courses/', blank=True, null=True, help_text="Course Thumbnail Image")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
